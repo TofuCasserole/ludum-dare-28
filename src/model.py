@@ -346,7 +346,7 @@ random.seed()
 
 
 class Room:
-    def __init__(self, doors, obstacles=[], monsters=[]):
+    def __init__(self, doors, obstacles=None, monsters=None):
         self.doors = doors
         self.obstacles = obstacles
         self.monsters = monsters
@@ -371,11 +371,6 @@ class Room:
     
     def monster_locations(self):
         return [monster.location for monster in self.monsters]
-
-rooms = []
-
-def initrooms():
-    rooms = [[Room((WEST)), Room((EAST))]]
 
 cur_room_row = 0
 cur_room_col = 0
