@@ -35,3 +35,6 @@ class Room:
         random.shuffle(possible_locations)
         for monster in self.monsters:
             monster.location = possible_locations.pop()
+            
+    def monster_locations(self):
+        return [monster.location for monster in self.monsters]
