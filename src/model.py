@@ -27,9 +27,9 @@ def load_png(name):
     try:
         image = pygame.image.load(fullname)
         if image.get_alpha() is None:
-            image = pygame.transform.scale(image.convert(), (64, 64))
+            image = pygame.transform.scale(image.convert(), (32, 32))
         else:
-            image = pygame.transform.scale(image.convert_alpha(), (64, 64))
+            image = pygame.transform.scale(image.convert_alpha(), (32, 32))
     except pygame.error, message:
             print 'Cannot load image:', fullname
             raise SystemExit, message
