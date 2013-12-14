@@ -34,7 +34,7 @@ def main():
     pygame.display.flip()
     
     while True:
-        clock.tick(30)
+        clock.tick(40)
         event_list = [event for event in pygame.event.get()]
         for event in event_list:
             if event.type == QUIT:
@@ -50,6 +50,7 @@ def main():
                     if cont: continue
                     character.movepos[0] = -8
                     character.tryingmoveleft = True
+                    character.last_direction_moved = "left"
                 elif event.key == K_w:
                     cont = False
                     for event2 in event_list:
@@ -58,6 +59,7 @@ def main():
                     if cont: continue
                     character.movepos[1] = -8
                     character.tryingmoveup = True
+                    character.last_direction_moved = "up"
                 elif event.key == K_s:
                     cont = False
                     for event2 in event_list:
@@ -66,6 +68,7 @@ def main():
                     if cont: continue
                     character.movepos[1] = 8
                     character.tryingmovedown = True
+                    character.last_directin_moved = "down"
                 elif event.key == K_d:
                     cont = False
                     for event2 in event_list:
@@ -74,6 +77,7 @@ def main():
                     if cont: continue
                     character.movepos[0] = 8
                     character.tryingmoveright = True
+                    character.last_direction_moved = "right"
             elif event.type == KEYUP:
                 if True == False:
                     pass
