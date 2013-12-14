@@ -55,6 +55,7 @@ class Character(pygame.sprite.Sprite):
         self.hitcount = 0
         self.invuln_count = 0
         self.hitmove = [0,0]
+        self.sword_cooldown = 30
     
     def getmovepos(self):
         if self.state == "hit":
@@ -66,6 +67,8 @@ class Character(pygame.sprite.Sprite):
         pass
             
     def update(self, obstacles, moveables):
+        self.sword_cooldown += 1
+        
         if self.state == "hit":
             if self.hitcount < 15:
                 self.hitcount += 1
@@ -98,6 +101,7 @@ class Monster(pygame.sprite.Sprite):
         self.state = "chase"
         self.movepos = [0,0]
         self.hitcount = 0
+        self.pushcount = 0
         
     def getmovepos(self):
         return self.movepos
@@ -126,6 +130,13 @@ class Monster(pygame.sprite.Sprite):
                 self.hitcount += 1
             else:
                 self.hitcount = 0
+                self.state = "chase"
+        
+        if self.state == "pushback":
+            if self.pushcount < 2:
+                self.pushcount += 1
+            else:
+                self.pushcount = 0
                 self.state = "chase"
                 
         if self.state == "chase":
@@ -171,9 +182,10 @@ class Sword(pygame.sprite.Sprite):
             self.rect.midtop = character.rect.midbottom
         self.count = 0
         
-    def update(self, character):
+    def update(self, character, monsters):
         if self.count > 20:
             self.kill()
+            character.sword_cooldown = 0
             return
         if character.last_direction_moved == "right":
             self.image = pygame.transform.rotate(self.image, 270-self.rotate)
@@ -191,6 +203,16 @@ class Sword(pygame.sprite.Sprite):
             self.image = pygame.transform.rotate(self.image, 180-self.rotate)
             self.rotate = 180
             self.rect.midtop = character.rect.midbottom
+        for monster in pygame.sprite.spritecollide(self, monsters, 0):
+            monster.state = "pushback"
+            if character.last_direction_moved == "right":
+                monster.movepos = [16, 0]
+            elif character.last_direction_moved == "left":
+                monster.movepos = [-16, 0]
+            elif character.last_direction_moved == "down":
+                monster.movepos = [0, 16]
+            elif character.last_direction_moved == "up":
+                monster.movepos = [0, -16]
         self.count += 1
 
 class Obstacle(pygame.sprite.Sprite):
@@ -199,7 +221,21 @@ class Obstacle(pygame.sprite.Sprite):
         self.image, self.rect = load_png(sprite)
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
+    
         self.rect.topleft = location
+
+class Door(pygame.sprite.Sprite):
+    def __init__(self, xpos, ypos):
+        pygame.sprite.Sprite.__init__(self)
+        self.rect.x = xpos
+        self.rect.y = ypos
+        self.rect.w = 32
+        self.rect.h = 32
+        
+    def update(self, character):
+        if pygame.sprite.collide_mask(self, character):
+            print("Door registered!")
+        
 '''
 doors are passed as an array of "east", "north", "south", and "west"
 
@@ -315,8 +351,7 @@ class Room:
             if not (y == 224 and WEST in doors):
                 self.walls.add(Obstacle((32, y), "wall.png"))
             if not (y == 224 and EAST in doors):
-                self.walls.add(Obstacle((608, y), "wall.png"))
-                
+                self.walls.add(Obstacle((608, y), "wall.png"))    
     
     def monster_locations(self):
         return [monster.location for monster in self.monsters]

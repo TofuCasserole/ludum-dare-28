@@ -46,7 +46,7 @@ def main():
             if event.type == QUIT:
                 return
             elif event.type == MOUSEBUTTONDOWN:
-                if sword.sprites() == []:
+                if sword.sprites() == [] and character.sword_cooldown > 25:
                     sword.add(model.Sword(character))
             elif event.type == KEYDOWN:
                 if True == False:
@@ -123,7 +123,7 @@ def main():
         for monster in currentroom.monsters.sprites():
             screen.blit(monster.image, monster.rect)
         charactersprites.update(currentroom.obstacles, moveables)
-        sword.update(character)
+        sword.update(character, monsters)
         charactersprites.draw(screen)
         monsters.update(currentroom.obstacles, moveables, character)
         monsters.draw(screen)
