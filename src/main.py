@@ -31,12 +31,13 @@ def main():
     monsters = pygame.sprite.RenderUpdates()
     monsters.add(model.Monster(charactersprites, obstacles, monsters), model.Monster(charactersprites, obstacles, monsters))
     
-    sword = pygame.sprite.RenderPlain() 
+    sword = pygame.sprite.RenderUpdates()
 
     moveables = pygame.sprite.RenderUpdates()
     moveables.add(monsters.sprites(), character)
     
     currentroom = model.Room(model.NORTH, obstacles, monsters)
+    obstacles.add(currentroom.walls)
     
     while True:
         clock.tick(40)
@@ -76,7 +77,7 @@ def main():
                     if cont: continue
                     character.movepos[1] = 8
                     character.tryingmovedown = True
-                    character.last_directin_moved = "down"
+                    character.last_direction_moved = "down"
                 elif event.key == K_d:
                     cont = False
                     for event2 in event_list:
@@ -122,10 +123,12 @@ def main():
         for monster in currentroom.monsters.sprites():
             screen.blit(monster.image, monster.rect)
         charactersprites.update(currentroom.obstacles, moveables)
+        sword.update(character)
         charactersprites.draw(screen)
         monsters.update(currentroom.obstacles, moveables, character)
         monsters.draw(screen)
         obstacles.draw(screen)
+        sword.draw(screen)
         pygame.display.flip()
 
 if __name__ == '__main__':
