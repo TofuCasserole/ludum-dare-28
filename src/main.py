@@ -11,12 +11,14 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
     
+    dirt = model.load_png("dirt.png")
     background = pygame.Surface(screen.get_size())
     background = background.convert()
-    background.fill((255,255,255))
-        
-    character = model.Character()
+    for x in range(32, 640, 32):
+        for y in range(0, 480, 32):
+            background.blit(dirt[0], (x, y));
     
+    character = model.Character()
     
     clock = pygame.time.Clock()
     
@@ -102,9 +104,11 @@ def main():
                     else:
                         character.movepos[0] = -8
                     character.tryingmoveright = False
-        screen.blit(background, character.rect)
+        
+        screen.blit(background, (0,0))
+        screen.blit(character.image, character.rect)
         for monster in monsters.sprites():
-            screen.blit(background, monster.rect)
+            screen.blit(monster.image, monster.rect)
         charactersprites.update(obstacles)
         charactersprites.draw(screen)
         monsters.update(obstacles, monsters, character)
