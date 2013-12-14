@@ -355,10 +355,18 @@ class Room:
         for monster in self.monsters:
             monster.location = possible_locations.pop()
         self.walls = pygame.sprite.RenderPlain()
-        # generate north walls
+        # generate north/south walls
         for x in range(32, 640, 32):
             if not (x == 320 and NORTH in doors):
                 self.walls.add(Obstacle((x, 0), "wall.png"))
+            if not (x == 320 and SOUTH in doors):
+                self.walls.add(Obstacle((x, 448), "wall.png"))
+        # generate east/west walls
+        for y in range(0, 480, 32):
+            if not (y == 224 and WEST in doors):
+                self.walls.add(Obstacle((32, y), "wall.png"))
+            if not (y == 224 and EAST in doors):
+                self.walls.add(Obstacle((608, y), "wall.png"))
                 
     
     def monster_locations(self):
