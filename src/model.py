@@ -125,7 +125,7 @@ class Character(pygame.sprite.Sprite):
 class Monster(pygame.sprite.Sprite):
     def __init__(self, character, obstacles, monsters):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('wall.png')
+        self.image, self.rect = load_png('slime.png')
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         random.seed()
@@ -318,6 +318,35 @@ class Monster(pygame.sprite.Sprite):
             self.movepos[1] *= -1/2
         pygame.event.pump()
             
+class Sword(pygame.sprite.Sprite):
+    def __init(self, character):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('sword.png')
+        screen = pygame.display.get_surface()
+        self.area = screen.get_rect()
+        if character.last_direction_moved == "right":
+            self.rect.midleft = character.rect.midright
+        if character.last_direction_moved == "left":
+            self.rect.midright = character.rect.midleft
+        if character.last_direction_moved == "up":
+            self.rect.midbottom = character.rect.midtop
+        if character.last_direction_moved == "down":
+            self.rect.midtop = character.rect.midbottom
+        self.count = 0
+        
+    def update(self, character):
+        if self.count > 20:
+            self.kill()
+            return
+        if character.last_direction_moved == "right":
+            self.rect.midleft = character.rect.midright
+        if character.last_direction_moved == "left":
+            self.rect.midright = character.rect.midleft
+        if character.last_direction_moved == "up":
+            self.rect.midbottom = character.rect.midtop
+        if character.last_direction_moved == "down":
+            self.rect.midtop = character.rect.midbottom
+        self.count += 1
 
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, location, sprite):
@@ -344,6 +373,21 @@ unlocated monster objects are passed as an array on construction
 random.seed()
 
 
+def move(sprite, moveables, obstacles, movepos, realign=False):
+    oldpos = sprite.rect
+    newpos = sprite.rect.move[(movepos[0], 0)]
+    if sprite.area.contains(newpos) and not realign:
+        sprite.rect = newpos
+    for obstacle in pygame.sprite.spritecollide(sprite, obstacles):
+        if obstacle == sprite:
+            continue
+        if movepos[0] > 0 and sprite.rect.right > obstacle.rect.left:
+            sprite.rect.right = obstacle.rect.left
+            for moveable in pygame.sprite.spritecollide(sprite, moveables, 0):
+                move()
+    
+        
+        
 
 class Room:
     def __init__(self, doors, obstacles=None, monsters=None):
