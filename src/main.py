@@ -15,13 +15,18 @@ def main():
     background = background.convert()
     background.fill((255,255,255))
         
-    global character
     character = model.Character()
+    
     
     clock = pygame.time.Clock()
     
     charactersprites = pygame.sprite.RenderUpdates(character)
     
+    obstacles = pygame.sprite.RenderPlain()
+    obstacles.add(model.Obstacle((128,128)), model.Obstacle((128, 192)), model.Obstacle((192,192)))
+    
+    monsters = pygame.sprite.RenderPlain()
+    monsters.add(model.Monster(charactersprites, obstacles, monsters))
     screen.blit(background, (0, 0))
     pygame.display.flip()
     
@@ -94,8 +99,10 @@ def main():
                         character.movepos[0] = -10
                     character.tryingmoveright = False
         screen.blit(background, character.rect)
-        charactersprites.update()
+        charactersprites.update(obstacles)
         charactersprites.draw(screen)
+        obstacles.draw(screen)
+        monsters.draw(screen)
         pygame.display.flip()
 
 if __name__ == '__main__':

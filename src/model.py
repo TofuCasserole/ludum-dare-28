@@ -50,19 +50,47 @@ class Character(pygame.sprite.Sprite):
         self.tryingmoveup = False
         self.tryingmovedown = False
         
-    def update(self):
-        newpos = self.rect.move(self.movepos)
+    def update(self, obstacles):
+        newpos = self.rect.move([self.movepos[0], 0])
         if self.area.contains(newpos):
             self.rect = newpos
+        for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
+            if self.movepos[0] > 0 and self.rect.right > obstacle.rect.left:
+                self.rect.right = obstacle.rect.left
+            if self.movepos[0] < 0 and self.rect.left < obstacle.rect.right:
+                self.rect.left = obstacle.rect.right
+            
+            
+        newpos = self.rect.move([0, self.movepos[1]])
+        if self.area.contains(newpos):
+            self.rect = newpos
+        for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
+            if self.movepos[1] > 0 and self.rect.bottom > obstacle.rect.top:
+                self.rect.bottom = obstacle.rect.top
+            if self.movepos[1] < 0 and self.rect.top < obstacle.rect.bottom:
+                self.rect.top = obstacle.rect.bottom
         pygame.event.pump()
         
 
 class Monster(pygame.sprite.Sprite):
-    def __init__(self, type):
-        self.type = type
-        self.location = False
+    def __init__(self, character, obstacles, monsters):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('wall.png')
+        screen = pygame.display.get_surface()
+        self.area = screen.get_rect()
+        random.seed()
+        self.rect.topleft = (random.randint(0,self.area.right-64), random.randint(0,self.area.bottom-64))
+        while (pygame.sprite.spritecollide(self, character, 0) != [] or pygame.sprite.spritecollide(self, obstacles, 0) != []
+               or pygame.sprite.spritecollide(self, monsters, 0) != []):
+            self.rect.topleft = (random.randint(0,self.area.right), random.randint(0,self.area.bottom))
 
-
+class Obstacle(pygame.sprite.Sprite):
+    def __init__(self, location):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('rock.png')
+        screen = pygame.display.get_surface()
+        self.area = screen.get_rect()
+        self.rect.topleft = location
 '''
 doors are passed as an array of "east", "north", "south", and "west"
 
@@ -79,6 +107,8 @@ parameter second, starting at 0,0 in the top left corner e.g.,
 unlocated monster objects are passed as an array on construction
 '''
 random.seed()
+
+
 
 class Room:
     def __init__(self, doors, obstacles=[], monsters=[]):
