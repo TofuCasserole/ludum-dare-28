@@ -63,8 +63,6 @@ class Character(pygame.sprite.Sprite):
     def on_collision(self, sprite):
         if isinstance(sprite, Monster):
             sprite.state = "hit"
-            sprite.movepos[0] = sprite.movepos[0] * -1/2
-            sprite.movepos[1] = sprite.movepos[1] * -1/2
             
     def update(self, obstacles, moveables):
         if self.state == "hit":
@@ -82,59 +80,6 @@ class Character(pygame.sprite.Sprite):
                 self.state = "move"
                 
         move(self, moveables, obstacles, self.getmovepos())
-        
-        '''newpos = self.rect.move([self.hitmove[0], 0])
-            if self.area.contains(newpos):
-                self.rect = newpos
-                for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
-                    if self.hitmove[0] > 0 and self.rect.right > obstacle.rect.left:
-                        self.rect.right = obstacle.rect.left
-                    if self.hitmove[0] < 0 and self.rect.left < obstacle.rect.right:
-                        self.rect.left = obstacle.rect.right
-            
-            
-            newpos = self.rect.move([0, self.hitmove[1]])
-            if self.area.contains(newpos):
-                self.rect = newpos
-                for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
-                    if self.hitmove[1] > 0 and self.rect.bottom > obstacle.rect.top:
-                        self.rect.bottom = obstacle.rect.top
-                    if self.hitmove[1] < 0 and self.rect.top < obstacle.rect.bottom:
-                        self.rect.top = obstacle.rect.bottom
-            pygame.event.pump()
-            return
-        
-        
-        
-        newpos = self.rect.move([self.movepos[0], 0])
-        if self.area.contains(newpos):
-            self.rect = newpos
-        for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
-            if self.movepos[0] > 0 and self.rect.right > obstacle.rect.left:
-                self.rect.right = obstacle.rect.left
-            if self.movepos[0] < 0 and self.rect.left < obstacle.rect.right:
-                self.rect.left = obstacle.rect.right
-        #if self.state == "invulnerable":
-        for obstacle in pygame.sprite.spritecollide(self, monsters, 0):
-            if self.movepos[0] > 0 and self.rect.right > obstacle.rect.left:
-                self.rect.right = obstacle.rect.left
-            if self.movepos[0] < 0 and self.rect.left < obstacle.rect.right:
-                self.rect.left = obstacle.rect.right
-            
-        newpos = self.rect.move([0, self.movepos[1]])
-        if self.area.contains(newpos):
-            self.rect = newpos
-        for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
-            if self.movepos[1] > 0 and self.rect.bottom > obstacle.rect.top:
-                self.rect.bottom = obstacle.rect.top
-            if self.movepos[1] < 0 and self.rect.top < obstacle.rect.bottom:
-                self.rect.top = obstacle.rect.bottom
-        #if self.state == "invulnerable":
-        for obstacle in pygame.sprite.spritecollide(self, monsters, 0):
-            if self.movepos[1] > 0 and self.rect.bottom > obstacle.rect.top:
-                self.rect.bottom = obstacle.rect.top
-            if self.movepos[1] < 0 and self.rect.top < obstacle.rect.bottom:
-                self.rect.top = obstacle.rect.bottom'''
         pygame.event.pump()
         
 
@@ -162,6 +107,8 @@ class Monster(pygame.sprite.Sprite):
                 sprite.hitmove[0] = self.movepos[0]/2
                 sprite.hitmove[1] = self.movepos[1]/2
                 sprite.state = "hit"
+            self.movepos[0] = self.movepos[0] / -2
+            self.movepos[1] = self.movepos[1] / -2
         if isinstance(sprite, Monster):
             if (self.state == "hit"):
                 sprite.movepos[0] = self.movepos[0]
@@ -194,162 +141,7 @@ class Monster(pygame.sprite.Sprite):
                 self.movepos[0] = 0
                 
         move(self, moveables, obstacles, self.movepos)
-        '''newpos = self.rect.move([self.movepos[0], 0])
-        if self.area.contains(newpos):
-            self.rect = newpos
-        for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
-            if obstacle == self:
-                continue
-            if self.movepos[0] > 0 and self.rect.right > obstacle.rect.left:
-                self.rect.right = obstacle.rect.left
-                for monster in pygame.sprite.spritecollide(self, monsters, 0):
-                    if monster == self:
-                        continue
-                    if self.rect.left < monster.rect.right:
-                        monster.rect.right = self.rect.left
-            if self.movepos[0] < 0 and self.rect.left < obstacle.rect.right:
-                self.rect.left = obstacle.rect.right
-                for monster in pygame.sprite.spritecollide(self, monsters, 0):
-                    if monster == self:
-                        continue
-                    if self.rect.right > monster.rect.left:
-                        monster.rect.left = self.rect.right
-        if self.state != "hit":
-            for obstacle in pygame.sprite.spritecollide(self, monsters, 0):
-                if obstacle == self:
-                    continue
-                if self.movepos[0] > 0 and self.rect.right > obstacle.rect.left:
-                    self.rect.right = obstacle.rect.left
-                    for monster in pygame.sprite.spritecollide(self, monsters, 0):
-                        if monster == self:
-                            continue
-                        if self.rect.left < monster.rect.right:
-                            monster.rect.right = self.rect.left
-                if self.movepos[0] < 0 and self.rect.left < obstacle.rect.right:
-                    self.rect.left = obstacle.rect.right
-                    for monster in pygame.sprite.spritecollide(self, monsters, 0):
-                        if monster == self:
-                            continue
-                        if self.rect.right > monster.rect.left:
-                            monster.rect.left = self.rect.right
-        if self.state == "hit":
-            for obstacle in pygame.sprite.spritecollide(self, monsters, 0):
-                if obstacle == self:
-                    continue
-                if self.movepos[0] > 0 and self.rect.right > obstacle.rect.left:
-                    obstacle.state = "hit"
-                    obstacle.hitcount = self.hitcount
-                    obstacle.movepos[0] = self.movepos[0]
-                    obstacle.rect.left = self.rect.right
-                if self.movepos[0] < 0 and self.rect.left < obstacle.rect.right:
-                    obstacle.state = "hit"
-                    obstacle.hitcount = self.hitcount
-                    obstacle.movepos[0] = self.movepos[0]
-                    obstacle.rect.right = self.rect.left
-        
-        if pygame.sprite.collide_rect(self, character) and self.state != "hit" and character.state != "invulnerable":
-            character.state = "hit"
-            character.hitmove[0] = self.movepos[0]/2
-            character.hitmove[1] = self.movepos[1]/2
-            self.state = "hit"
-            if self.movepos[0] > 0:
-                self.rect.right = character.rect.left
-                for monster in pygame.sprite.spritecollide(self, monsters, 0):
-                    if monster == self:
-                        continue
-                    if self.rect.left < monster.rect.right:
-                        monster.rect.right = self.rect.left
-            if self.movepos[0] < 0:
-                self.rect.left = character.rect.right
-                for monster in pygame.sprite.spritecollide(self, monsters, 0):
-                    if monster == self:
-                        continue
-                    if self.rect.right > monster.rect.left:
-                        monster.rect.left = self.rect.right
-            self.movepos[0] *=  -1/2
-            self.movepos[1] *= -1/2
-        elif pygame.sprite.collide_rect(self, character):
-            self.state = "hit"
-            self.movepos[0] *=  -1/2
-            self.movepos[1] *= -1/2
-            
-        newpos = self.rect.move([0, self.movepos[1]])
-        if self.area.contains(newpos):
-            self.rect = newpos
-        for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
-            if obstacle == self:
-                continue
-            if self.movepos[1] > 0 and self.rect.bottom > obstacle.rect.top:
-                self.rect.bottom = obstacle.rect.top
-                for monster in pygame.sprite.spritecollide(self, monsters, 0):
-                    if monster == self:
-                        continue
-                    if self.rect.top < monster.rect.bottom:
-                        monster.rect.bottom = self.rect.top
-            if self.movepos[1] < 0 and self.rect.top < obstacle.rect.bottom:
-                self.rect.top = obstacle.rect.bottom
-                for monster in pygame.sprite.spritecollide(self, monsters, 0):
-                    if monster == self:
-                        continue
-                    if self.rect.bottom > monster.rect.top:
-                        monster.rect.top = self.rect.bottom
-        if self.state != "hit":
-            for obstacle in pygame.sprite.spritecollide(self, monsters, 0):
-                if obstacle == self:
-                    continue
-                if self.movepos[1] > 0 and self.rect.bottom > obstacle.rect.top:
-                    self.rect.bottom = obstacle.rect.top
-                    for monster in pygame.sprite.spritecollide(self, monsters, 0):
-                        if monster == self:
-                            continue
-                        if self.rect.top < monster.rect.bottom:
-                            monster.rect.bottom = self.rect.top
-                if self.movepos[1] < 0 and self.rect.top < obstacle.rect.bottom:
-                    self.rect.top = obstacle.rect.bottom
-                    for monster in pygame.sprite.spritecollide(self, monsters, 0):
-                        if monster == self:
-                            continue
-                        if self.rect.bottom > monster.rect.top:
-                            monster.rect.top = self.rect.self
-        if self.state == "hit":
-            for obstacle in pygame.sprite.spritecollide(self, monsters, 0):
-                if obstacle == self:
-                    continue
-                if obstacle.movepos[1] > 0 and self.rect.bottom > obstacle.rect.top:
-                    obstacle.state = "hit"
-                    obstacle.hitcount = self.hitcount
-                    obstacle.movepos[1] = self.movepos[1]
-                    obstacle.rect.top = self.rect.bottom
-                if self.movepos[1] < 0 and self.rect.top < obstacle.rect.bottom:
-                    obstacle.state = "hit"
-                    obstacle.hitcount = self.hitcount
-                    obstacle.movepos[1] = self.movepos[1]
-                    obstacle.rect.bottom = self.rect.top
-        if pygame.sprite.collide_rect(self, character) and self.state != "hit" and character.state != "invulnerable":
-            character.state = "hit"
-            character.hitmove[0] = self.movepos[0]/2
-            character.hitmove[1] = self.movepos[1]/2
-            self.state = "hit"
-            if self.movepos[1] > 0:
-                self.rect.bottom =  character.rect.top
-                for monster in pygame.sprite.spritecollide(self, monsters, 0):
-                    if monster == self:
-                        continue
-                    if self.rect.top < monster.rect.bottom:
-                        monster.rect.bottom = self.rect.top
-            if self.movepos[1] < 0:
-                self.rect.top = character.rect.bottom
-                for monster in pygame.sprite.spritecollide(self, monsters, 0):
-                    if monster == self:
-                        continue
-                    if self.rect.bottom > monster.rect.top:
-                        monster.rect.top = self.rect.bottom
-            self.movepos[0] *=  -1/2
-            self.movepos[1] *= -1/2
-        elif pygame.sprite.collide_rect(self, character):
-            self.state = "hit"
-            self.movepos[0] *=  -1/2
-            self.movepos[1] *= -1/2'''
+    
         pygame.event.pump()
 
 class Sword(pygame.sprite.Sprite):

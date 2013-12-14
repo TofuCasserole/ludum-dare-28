@@ -121,9 +121,9 @@ def main():
         currentroom.walls.draw(screen)
         for monster in currentroom.monsters.sprites():
             screen.blit(monster.image, monster.rect)
-        charactersprites.update(currentroom.obstacles, currentroom.monsters)
+        charactersprites.update(currentroom.obstacles, moveables)
         charactersprites.draw(screen)
-        monsters.update(currentroom.obstacles, currentroom.monsters, character)
+        monsters.update(currentroom.obstacles, moveables, character)
         monsters.draw(screen)
         obstacles.draw(screen)
         pygame.display.flip()
