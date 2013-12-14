@@ -401,7 +401,7 @@ def move(sprite, moveables, obstacles, movepos, reallign = False):
         
 
 class Room:
-    def __init__(self, doors, obstacles=[], monsters=[]):
+    def __init__(self, doors, obstacles=None, monsters=None):
         self.doors = doors
         self.obstacles = obstacles
         self.monsters = monsters
@@ -410,19 +410,22 @@ class Room:
         for monster in self.monsters:
             monster.location = possible_locations.pop()
         self.walls = pygame.sprite.RenderPlain()
-        # generate north walls
+        # generate north/south walls
         for x in range(32, 640, 32):
             if not (x == 320 and NORTH in doors):
                 self.walls.add(Obstacle((x, 0), "wall.png"))
+            if not (x == 320 and SOUTH in doors):
+                self.walls.add(Obstacle((x, 448), "wall.png"))
+        # generate east/west walls
+        for y in range(0, 480, 32):
+            if not (y == 224 and WEST in doors):
+                self.walls.add(Obstacle((32, y), "wall.png"))
+            if not (y == 224 and EAST in doors):
+                self.walls.add(Obstacle((608, y), "wall.png"))
                 
     
     def monster_locations(self):
         return [monster.location for monster in self.monsters]
-
-rooms = []
-
-def initrooms():
-    rooms = [[Room((WEST)), Room((EAST))]]
 
 cur_room_row = 0
 cur_room_col = 0

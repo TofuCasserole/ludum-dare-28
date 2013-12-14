@@ -11,7 +11,6 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
     
-    model.initrooms()
     dirt = model.load_png("dirt.png")
     background = pygame.Surface(screen.get_size())
     background = background.convert()
@@ -33,8 +32,8 @@ def main():
     monsters.add(model.Monster(charactersprites, obstacles, monsters), model.Monster(charactersprites, obstacles, monsters))
     
     sword = pygame.sprite.RenderPlain()
-    screen.blit(background, (0, 0))
-    pygame.display.flip()
+
+    currentroom = model.Room(model.NORTH, obstacles, monsters)
     
     while True:
         clock.tick(40)
@@ -116,11 +115,12 @@ def main():
                         character.movepos[0] = -8
                     character.tryingmoveright = False
         screen.blit(background, (0,0))
-        for monster in monsters.sprites():
+        currentroom.walls.draw(screen)
+        for monster in currentroom.monsters.sprites():
             screen.blit(monster.image, monster.rect)
-        charactersprites.update(obstacles, monsters)
+        charactersprites.update(currentroom.obstacles, currentroom.monsters)
         charactersprites.draw(screen)
-        monsters.update(obstacles, monsters, character)
+        monsters.update(currentroom.obstacles, currentroom.monsters, character)
         monsters.draw(screen)
         obstacles.draw(screen)
         pygame.display.flip()
