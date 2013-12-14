@@ -372,18 +372,30 @@ unlocated monster objects are passed as an array on construction
 '''
 random.seed()
 
-def move(sprite, moveables, obstacles, movepos, realign=False):
+def move(sprite, moveables, obstacles, movepos, reallign = False):
     oldpos = sprite.rect
     newpos = sprite.rect.move[(movepos[0], 0)]
-    if sprite.area.contains(newpos) and not realign:
+    if sprite.area.contains(newpos) and not reallign:
         sprite.rect = newpos
     for obstacle in pygame.sprite.spritecollide(sprite, obstacles):
-        if obstacle == sprite:
-            continue
         if movepos[0] > 0 and sprite.rect.right > obstacle.rect.left:
             sprite.rect.right = obstacle.rect.left
             for moveable in pygame.sprite.spritecollide(sprite, moveables, 0):
-                move()
+                move(moveable, moveables, obstacles, moveable.getmovepos(), True)
+        if movepos[0] < 0 and sprite.rect.left < obstacle.rect.right:
+            sprite.rect.left = obstacle.rect.right
+            for moveable in pygame.sprite.spritecollide(sprite, moveables, 0):
+                move(moveable, moveables, obstacles, moveable.getmovepos(), True)
+    for moveable in pygame.sprite.spritecollide(sprite, moveables):
+        if moveable == sprite:
+            continue
+        if movepos[0] > sprite.rect.right > moveable.left:
+            sprite.rect.right = moveable.rect.left
+            sprite.on_collision(moveable)
+            for moveable in pygame.sprite.spritecollide(sprite, moveables, 0):
+                move(moveable, moveables, moveable.getmovepos(), True)
+            
+        
     
         
         
