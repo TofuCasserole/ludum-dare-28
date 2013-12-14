@@ -349,9 +349,9 @@ class Sword(pygame.sprite.Sprite):
         self.count += 1
 
 class Obstacle(pygame.sprite.Sprite):
-    def __init__(self, location):
+    def __init__(self, location, sprite):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('rock.png')
+        self.image, self.rect = load_png(sprite)
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         self.rect.topleft = location
@@ -385,10 +385,20 @@ class Room:
         random.shuffle(possible_locations)
         for monster in self.monsters:
             monster.location = possible_locations.pop()
-            
+        self.walls = pygame.sprite.RenderPlain()
+        # generate north walls
+        for x in range(32, 640, 32):
+            if not (x == 320 and NORTH in doors):
+                self.walls.add(Obstacle((x, 0), "wall.png"))
+                
+    
     def monster_locations(self):
         return [monster.location for monster in self.monsters]
-    
-rooms = [[Room(WEST), Room(EAST)]]
+
+rooms = []
+
+def initrooms():
+    rooms = [[Room((WEST)), Room((EAST))]]
+
 cur_room_row = 0
 cur_room_col = 0

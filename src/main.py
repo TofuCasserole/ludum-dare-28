@@ -11,6 +11,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
     
+    model.initrooms()
     dirt = model.load_png("dirt.png")
     background = pygame.Surface(screen.get_size())
     background = background.convert()
@@ -26,7 +27,7 @@ def main():
     charactersprites = pygame.sprite.RenderUpdates(character)
     
     obstacles = pygame.sprite.RenderPlain()
-    obstacles.add(model.Obstacle((128,128)), model.Obstacle((128, 192)), model.Obstacle((192,192)))
+    obstacles.add(model.Obstacle((128,128), "rock.png"), model.Obstacle((128, 192), "rock.png"), model.Obstacle((192,192), "rock.png"))
     
     monsters = pygame.sprite.RenderUpdates()
     monsters.add(model.Monster(charactersprites, obstacles, monsters), model.Monster(charactersprites, obstacles, monsters))
