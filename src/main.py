@@ -37,72 +37,79 @@ def main():
             if event.type == QUIT:
                 return
             elif event.type == KEYDOWN:
-                if event.key == K_a:
+                if True == False:
+                    pass
+                elif event.key == K_a:
                     cont = False
                     for event2 in event_list:
                         if event2.type == KEYDOWN and event2.key == K_d:
                             cont = True
                     if cont: continue
-                    character.movepos[0] = -10
+                    character.movepos[0] = -8
                     character.tryingmoveleft = True
-                if event.key == K_w:
+                elif event.key == K_w:
                     cont = False
                     for event2 in event_list:
                         if event2.type == KEYDOWN and event2.key == K_s:
                             cont = True
                     if cont: continue
-                    character.movepos[1] = -10
+                    character.movepos[1] = -8
                     character.tryingmoveup = True
-                if event.key == K_s:
+                elif event.key == K_s:
                     cont = False
                     for event2 in event_list:
                         if event2.type == KEYDOWN and event2.key == K_w:
                             cont = True
                     if cont: continue
-                    character.movepos[1] = 10
+                    character.movepos[1] = 8
                     character.tryingmovedown = True
-                if event.key == K_d:
+                elif event.key == K_d:
                     cont = False
                     for event2 in event_list:
                         if event2.type == KEYDOWN and event2.key == K_a:
                             cont = True
                     if cont: continue
-                    character.movepos[0] = 10
+                    character.movepos[0] = 8
                     character.tryingmoveright = True
             elif event.type == KEYUP:
-                if event.key == K_a:
+                if True == False:
+                    pass
+                elif event.key == K_a:
                     #if character.movepos[0] < 0:
                     if character.tryingmoveright == False:
                         character.movepos[0] = 0
                     else:
-                        character.movepos[0] = 10
+                        character.movepos[0] = 8
                     character.tryingmoveleft = False
-                if event.key == K_w:
+                elif event.key == K_w:
                     #if character.movepos[1] < 0:
                     if character.tryingmovedown == False:
                         character.movepos[1] = 0
                     else:
-                        character.movepos[1] = 10
+                        character.movepos[1] = 8
                     character.tryingmoveup = False
-                if event.key == K_s:
+                elif event.key == K_s:
                     #if character.movepos[1] > 0:
                     if character.tryingmoveup == False:
                         character.movepos[1] = 0
                     else:
-                        character.movepos[1] = -10
+                        character.movepos[1] = -8
                     character.tryingmovedown = False
-                if event.key == K_d:
+                elif event.key == K_d:
                     #if character.movepos[0] > 0:
                     if character.tryingmoveleft == False:
                         character.movepos[0] = 0
                     else:
-                        character.movepos[0] = -10
+                        character.movepos[0] = -8
                     character.tryingmoveright = False
         screen.blit(background, character.rect)
+        for monster in monsters.sprites():
+            screen.blit(background, monster.rect)
         charactersprites.update(obstacles)
         charactersprites.draw(screen)
-        obstacles.draw(screen)
+        monsters.update(obstacles, monsters, character)
         monsters.draw(screen)
+        obstacles.draw(screen)
         pygame.display.flip()
 
 if __name__ == '__main__':
