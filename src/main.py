@@ -26,12 +26,12 @@ def main():
     obstacles.add(model.Obstacle((128,128)), model.Obstacle((128, 192)), model.Obstacle((192,192)))
     
     monsters = pygame.sprite.RenderPlain()
-    monsters.add(model.Monster(charactersprites, obstacles, monsters))
+    monsters.add(model.Monster(charactersprites, obstacles, monsters), model.Monster(charactersprites, obstacles, monsters))
     screen.blit(background, (0, 0))
     pygame.display.flip()
     
     while True:
-        clock.tick(60)
+        clock.tick(30)
         event_list = [event for event in pygame.event.get()]
         for event in event_list:
             if event.type == QUIT:
@@ -105,7 +105,7 @@ def main():
         screen.blit(background, character.rect)
         for monster in monsters.sprites():
             screen.blit(background, monster.rect)
-        charactersprites.update(obstacles)
+        charactersprites.update(obstacles, monsters)
         charactersprites.draw(screen)
         monsters.update(obstacles, monsters, character)
         monsters.draw(screen)
