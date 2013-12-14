@@ -125,7 +125,7 @@ class Character(pygame.sprite.Sprite):
 class Monster(pygame.sprite.Sprite):
     def __init__(self, character, obstacles, monsters):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('wall.png')
+        self.image, self.rect = load_png('slime.png')
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         random.seed()
@@ -317,7 +317,36 @@ class Monster(pygame.sprite.Sprite):
             self.movepos[0] *=  -1/2
             self.movepos[1] *= -1/2
         pygame.event.pump()
-            
+
+class Sword(pygame.sprite.Sprite):
+    def __init(self, character):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('sword.png')
+        screen = pygame.display.get_surface()
+        self.area = screen.get_rect()
+        if character.last_direction_moved == "right":
+            self.rect.midleft = character.rect.midright
+        if character.last_direction_moved == "left":
+            self.rect.midright = character.rect.midleft
+        if character.last_direction_moved == "up":
+            self.rect.midbottom = character.rect.midtop
+        if character.last_direction_moved == "down":
+            self.rect.midtop = character.rect.midbottom
+        self.count = 0
+        
+    def update(self, character):
+        if self.count > 20:
+            self.kill()
+            return
+        if character.last_direction_moved == "right":
+            self.rect.midleft = character.rect.midright
+        if character.last_direction_moved == "left":
+            self.rect.midright = character.rect.midleft
+        if character.last_direction_moved == "up":
+            self.rect.midbottom = character.rect.midtop
+        if character.last_direction_moved == "down":
+            self.rect.midtop = character.rect.midbottom
+        self.count += 1
 
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, location):
@@ -343,6 +372,8 @@ unlocated monster objects are passed as an array on construction
 '''
 random.seed()
 
+def move(sprite, moveable_others, immoveable_others):
+    pass
 
 
 class Room:

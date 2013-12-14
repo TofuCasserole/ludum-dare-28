@@ -28,8 +28,10 @@ def main():
     obstacles = pygame.sprite.RenderPlain()
     obstacles.add(model.Obstacle((128,128)), model.Obstacle((128, 192)), model.Obstacle((192,192)))
     
-    monsters = pygame.sprite.RenderPlain()
+    monsters = pygame.sprite.RenderUpdates()
     monsters.add(model.Monster(charactersprites, obstacles, monsters), model.Monster(charactersprites, obstacles, monsters))
+    
+    sword = pygame.sprite.RenderPlain()
     screen.blit(background, (0, 0))
     pygame.display.flip()
     
@@ -39,6 +41,9 @@ def main():
         for event in event_list:
             if event.type == QUIT:
                 return
+            elif event.type == MOUSEBUTTONDOWN:
+                if sword.sprites() == []:
+                    sword.add(model.Sword(character))
             elif event.type == KEYDOWN:
                 if True == False:
                     pass
