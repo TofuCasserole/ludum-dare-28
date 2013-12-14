@@ -28,13 +28,12 @@ def main():
     obstacles = pygame.sprite.RenderPlain()
     obstacles.add(model.Obstacle((128,128), "rock.png"), model.Obstacle((128, 192), "rock.png"), model.Obstacle((192,192), "rock.png"))
     
-    monsters = pygame.sprite.RenderPlain()
+    monsters = pygame.sprite.RenderUpdates()
     monsters.add(model.Monster(charactersprites, obstacles, monsters), model.Monster(charactersprites, obstacles, monsters))
+    
+    sword = pygame.sprite.RenderPlain()
 
     currentroom = model.Room(model.NORTH, obstacles, monsters)
-    
-    #screen.blit(background, (0, 0))
-    #pygame.display.flip()
     
     while True:
         clock.tick(40)
@@ -42,6 +41,9 @@ def main():
         for event in event_list:
             if event.type == QUIT:
                 return
+            elif event.type == MOUSEBUTTONDOWN:
+                if sword.sprites() == []:
+                    sword.add(model.Sword(character))
             elif event.type == KEYDOWN:
                 if True == False:
                     pass
