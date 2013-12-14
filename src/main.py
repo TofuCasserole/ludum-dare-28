@@ -31,8 +31,11 @@ def main():
     monsters = pygame.sprite.RenderUpdates()
     monsters.add(model.Monster(charactersprites, obstacles, monsters), model.Monster(charactersprites, obstacles, monsters))
     
-    sword = pygame.sprite.RenderPlain()
+    sword = pygame.sprite.RenderPlain() 
 
+    moveables = pygame.sprite.RenderUpdates()
+    moveables.add(monsters.sprites(), character)
+    
     currentroom = model.Room(model.NORTH, obstacles, monsters)
     
     while True:
