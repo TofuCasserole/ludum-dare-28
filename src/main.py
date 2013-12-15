@@ -8,7 +8,6 @@ from pygame.locals import *
 import model
 import gui
 
-
 def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
