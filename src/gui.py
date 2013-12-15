@@ -11,8 +11,8 @@ from spritesheet import SpriteSheet
 class HealthBar():
     
     def __init__(self):
-        self.sheet = SpriteSheet(model.load_png("gui.png"))
+        self.sheet = SpriteSheet(model.load_png("gui.png")[0])
         self.value = 100
     
     def draw(self, surface):
-        surface.blit(self.sheet.image_at((32,0,64,16)), (0,0))
+        surface.blit(self.sheet.image_at((16,0,32,8)), (0,0))
