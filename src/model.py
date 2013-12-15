@@ -371,7 +371,7 @@ class Room:
         return str(self.cord)+':'+str(self.connectingRooms)
     def __repr__(self):
         return self.__str__()
-    def generateWalls(self):
+    def generate_walls(self):
         print(self.doors)
         if self.obstacles!=None and self.monsters!=None:
             possible_locations = [(x,y) for x in range(0, WIDTH) for y in range (0, LENGTH) if (x,y) not in self.obstacles]
@@ -444,8 +444,8 @@ class Level:
                     queue.append(exits[i])
                     count+=1
                 #add the direcitons to room.doors
-                self.levelGrid[currentX][currentY].doors.append(direction[i])
-                self.levelGrid[x][y].doors.append(inverseDirection[i])
+                #self.levelGrid[currentX][currentY].doors.append(direction[i])
+                #self.levelGrid[x][y].doors.append(inverseDirection[i])
                 #add the room to the connectedrooms dict
                 self.levelGrid[currentX][currentY].connectingRooms[direction[i]]=exits[i]
                 self.levelGrid[x][y].connectingRooms[inverseDirection[i]]=currentPlace
