@@ -6,6 +6,7 @@ Created on Dec 15, 2013
 
 import pygame
 import model
+import random
 
 def blue_mnm(object, obstacles, moveables, character):
     if object.state == "wander":
@@ -20,7 +21,7 @@ def blue_mnm(object, obstacles, moveables, character):
             object.hitcount = 0
             object.state = "chase"
             for current_collisions in pygame.sprite.spritecollide(object, moveables,0):
-                object.can_collide.add(current_collisions)
+                object.cannot_collide.add(current_collisions)
         model.move(object, moveables, obstacles, object.movepos)
         pygame.event.pump()
         return
@@ -48,7 +49,76 @@ def blue_mnm(object, obstacles, moveables, character):
     
     
     model.move(object, moveables, obstacles, object.movepos)
-    for current_collision in object.can_collide.sprites():
+    for current_collision in object.cannot_collide.sprites():
         if not current_collision in pygame.sprite.spritecollide(object, moveables, 0):
-            object.can_collide.remove(current_collision)
+            object.cannot_collide.remove(current_collision)
+    pygame.event.pump()
+
+def green_mnm(object, obstacles, moveables, character):
+    if object.state == "hit":
+        if object.hitcount < 15:
+            object.hitcount += 1
+        else:
+            object.hitcount = 0
+            object.pushcount = 0
+            object.waitcount = 0
+            object.movecount = 0
+            object.state = "wait2"
+            for current_collisions in pygame.sprite.spritecollide(object, moveables,0):
+                object.cannot_collide.add(current_collisions)
+        model.move(object, moveables, obstacles, object.movepos)
+        pygame.event.pump()
+        return
+   
+    if object.state == "pushback":
+        if object.pushcount < 2:
+            object.pushcount += 1
+        else:
+            object.pushcount = 0
+            object.movepos = [0,0]
+            object.state = "wait2"
+            
+    if object.state == "wait2":
+        if object.waitcount < 40:
+            object.waitcount += 1
+        else:
+            random.seed()
+            object.waitcount = 0
+            object.movepos[0] = random.randint(-1,1)*3
+            object.movepos[1] = random.randint(-1,1)*3
+            object.state = "move"
+            
+    if object.state == "move":
+        if object.movecount < 60:
+            object.movecount += 1
+        else:
+            object.movecount = 0
+            object.movepos = [0,0]
+            object.state = "wait1"
+            
+    if object.state == "wait1":
+        if object.waitcount < 40:
+            object.waitcount += 1
+        else:
+            myProjectile = model.Projectile('slimeball.png', 2)
+            character.currentroom.projectiles.add(myProjectile)
+            myProjectile.rect.center = object.rect.center
+            x_distance = abs(object.rect.x - character.rect.x)
+            y_distance = abs(object.rect.y - character.rect.y)
+            x_speed = 12*x_distance/(x_distance+y_distance)
+            y_speed = 12*y_distance/(x_distance+y_distance)
+            if object.rect.x > character.rect.x:
+                x_speed *= -1
+            if object.rect.y > character.rect.y:
+                y_speed *= -1
+            myProjectile.movepos = [x_speed, y_speed]
+            
+            
+            object.waitcount = 0
+            object.state = "wait2"
+            
+    model.move(object, moveables, obstacles, object.movepos)
+    for current_collision in object.cannot_collide.sprites():
+        if not current_collision in pygame.sprite.spritecollide(object, moveables, 0):
+            object.cannot_collide.remove(current_collision)
     pygame.event.pump()
