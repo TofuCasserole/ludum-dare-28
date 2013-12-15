@@ -230,7 +230,7 @@ class Obstacle(pygame.sprite.Sprite):
 class Door(pygame.sprite.Sprite):
     def __init__(self, location):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('rock.png')
+        self.image, self.rect = load_png('door.png')
         self.rect.topleft = location
         
     def update(self, character):
