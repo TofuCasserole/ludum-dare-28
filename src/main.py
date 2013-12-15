@@ -8,6 +8,7 @@ from pygame.locals import *
 import model
 import gui
 
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
@@ -39,9 +40,9 @@ def main():
     moveables = pygame.sprite.RenderUpdates()
     moveables.add(monsters.sprites(), character)
     
-    currentroom = l.getLocation(l.rootRoom)
+    character.currentroom = l.getLocation(l.rootRoom)
     
-    obstacles.add(currentroom.walls)
+    obstacles.add(character.currentroom.walls)
     
     while True:
         clock.tick(40)
@@ -125,16 +126,16 @@ def main():
         screen.blit(background, (0,0))
         healthbar.health = character.health
         healthbar.draw(screen)
-        currentroom.walls.draw(screen)
-        for monster in currentroom.monsters.sprites():
-            screen.blit(monster.image, monster.rect)
+        character.currentroom.walls.draw(screen)
+        #for monster in currentroom.monsters.sprites():
+        #    screen.blit(monster.image, monster.rect)
         charactersprites.update(obstacles, moveables)
         sword.update(character, monsters)
         charactersprites.draw(screen)
-        monsters.update(obstacles, moveables, character)
-        monsters.draw(screen)
-        obstacles.draw(screen)
-        currentroom.door_sprites.update(character)
+        #monsters.update(obstacles, moveables, character)
+        #monsters.draw(screen)
+        #obstacles.draw(screen)
+        character.currentroom.door_sprites.update(character, l)
         sword.draw(screen)
         pygame.display.flip()
 
