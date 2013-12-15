@@ -231,21 +231,28 @@ class Obstacle(pygame.sprite.Sprite):
 class Door(pygame.sprite.Sprite):
     def __init__(self, location):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('rock.png')
+        self.image, self.rect = load_png('door.png')
         self.image = pygame.transform.scale2x(self.image)
         self.rect.topleft = location
         
     def update(self, character):
         if pygame.sprite.collide_mask(self, character):
-            print("Door registered!")
+            if self.rect.left == 320 and self.rect.top == 0:
+                character.rect.y = 416
+            elif self.rect.left == 320 and self.rect.top == 448:
+                character.rect.y = 32
+            elif self.rect.top == 224 and self.rect.left == 32:
+                character.rect.x = 576
+            elif self.rect.top == 224 and self.rect.left == 608:
+                character.rect.x = 64
         
 '''
 doors are passed as an array of "east", "north", "south", and "west"
 
 obstacles are passed as a list array of 2 tuples with the y parameter first and the x
-parameter second, starting at 0,0 in the top left corner e.g.,
+aparameter second, starting at 0,0 in the top left corner e.g.,
 -------------------
-| 0,0 | 0,1 | 0,2 |
+| 0,0 | 0,1 s| 0,2 |
 -------------------
 | 1,0 | 1,1 | 1,2 |
 -------------------
@@ -373,7 +380,7 @@ class Room:
             if not (y == 224 and EAST in self.doors):
                 self.walls.add(Obstacle((608, y), "wall.png"))
             else:
-                self.door_sprites.add(Door((320,224)))
+                self.door_sprites.add(Door((608,224)))
 
     def monster_locations(self):
         return [monster.location for monster in self.monsters]
