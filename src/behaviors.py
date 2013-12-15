@@ -7,47 +7,69 @@ Created on Dec 15, 2013
 import pygame
 import model
 import random
+import utils
 
 def blue_mnm(object, obstacles, moveables, character):
-    if object.state == "wander":
-        coords = object.rect.top, object.rect.left
-        
-        
-    
     if object.state == "hit":
         if object.hitcount < 15:
             object.hitcount += 1
         else:
             object.hitcount = 0
-            object.state = "chase"
+            object.pushcount = 0
+            object.waitcount = 0
+            object.movecount = 0
+            object.state = "wait"
             for current_collisions in pygame.sprite.spritecollide(object, moveables,0):
                 object.cannot_collide.add(current_collisions)
         model.move(object, moveables, obstacles, object.movepos)
         pygame.event.pump()
         return
-            
+    
+    if object.state != "hit" and object.state != "pushback" and object.state != "windup":
+        if utils.distance(object.rect.topleft, character.rect.topleft) <= 96:
+            object.target = character.rect.topleft
+            object.state = "windup"
+    
+    if object.state == "windup":
+        if object.waitcount < 20:
+            object.waitcount += 1
+        else:
+            object.waitcount = 0
+            vec = utils.convert_to_unit_vector(object.rect.x, character.rect.x, object.rect.y, character.rect.y)
+            object.movepos = [vec[0] * 10, vec[1] * 10]
+            object.state = "jump"
+    
+    if object.state == "jump":
+        if object.rect.topleft == object.target:
+            object.movepos = [0,0]
+            object.state = "wait"
+    
     if object.state == "pushback":
         if object.pushcount < 2:
             object.pushcount += 1
         else:
             object.pushcount = 0
-            object.state = "chase"
-    
-    if object.state == "chase":
-        if object.rect.top > character.rect.top:
-            object.movepos[1] = -3
-        elif object.rect.bottom < character.rect.bottom:
-            object.movepos[1] = 3
+            object.movepos = [0,0]
+            object.state = "wait"
+            
+    if object.state == "wait":
+        if object.waitcount < 40:
+            object.waitcount += 1
         else:
-            object.movepos[1] = 0
-        if object.rect.left > character.rect.left:
-            object.movepos[0] = -3
-        elif object.rect.right < character.rect.right:
-            object.movepos[0] = 3
+            random.seed()
+            object.waitcount = 0
+            object.movepos[0] = random.randint(-1,1)*3
+            object.movepos[1] = random.randint(-1,1)*3
+            object.state = "move"
+            
+    if object.state == "move":
+        if object.movecount < 60:
+            object.movecount += 1
         else:
-            object.movepos[0] = 0
-    
-    
+            object.movecount = 0
+            object.movepos = [0,0]
+            object.state = "wait"
+                        
     model.move(object, moveables, obstacles, object.movepos)
     for current_collision in object.cannot_collide.sprites():
         if not current_collision in pygame.sprite.spritecollide(object, moveables, 0):
@@ -103,16 +125,8 @@ def green_mnm(object, obstacles, moveables, character):
             myProjectile = model.Projectile('slimeball.png', 2)
             character.currentroom.projectiles.add(myProjectile)
             myProjectile.rect.center = object.rect.center
-            x_distance = abs(object.rect.x - character.rect.x)
-            y_distance = abs(object.rect.y - character.rect.y)
-            x_speed = 12*x_distance/(x_distance+y_distance)
-            y_speed = 12*y_distance/(x_distance+y_distance)
-            if object.rect.x > character.rect.x:
-                x_speed *= -1
-            if object.rect.y > character.rect.y:
-                y_speed *= -1
-            myProjectile.movepos = [x_speed, y_speed]
-            
+            vec = utils.convert_to_unit_vector(object.rect.x, character.rect.x, object.rect.y, character.rect.y)
+            myProjectile.movepos = [int(vec[0] * 12), int(vec[1] * 12)]
             
             object.waitcount = 0
             object.state = "wait2"

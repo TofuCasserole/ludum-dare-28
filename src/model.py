@@ -117,31 +117,28 @@ class Monster(pygame.sprite.Sprite):
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         random.seed()
-        self.state = "chase"
         self.movepos = [0,0]
         self.hitcount = 0
         self.pushcount = 0
         self.cannot_collide = pygame.sprite.Group()
+        self.health = 20
+        self.strength = 2
+        self.waitcount = 0
+        self.movecount = 0
+        x = random.randint(0,2)
+        if x == 1:
+            self.state = "move"
+            self.movepos[0] = random.randint(-1,1)*3
+            self.movepos[1] = random.randint(-1,1)*3
+            self.movecount = random.randint(0,60)
+            self.waitcount = random.randint(0,40)
         if type == MnM:
-            self.health = 20
-            self.strength = 2
-        if type == MnM_RANGED:
-            self.health = 20
-            self.strength = 2
-            self.waitcount = 0
-            self.movecount = 0
-            x = random.randint(0,2)
+            self.state = "wait"
+        elif type == MnM_RANGED:
             if x == 0:
                 self.state = "wait2"
-                self.waitcount = random.randint(0,40)
-            if x == 1:
-                self.state = "move"
-                self.movepos[0] = random.randint(-1,1)*3
-                self.movepos[1] = random.randint(-1,1)*3
-                self.movecount = random.randint(0,60)
             if x == 2:
                 self.state = "wait1"
-                self.waitcount = random.randint(0,40)
             
      
     def getmovepos(self):
