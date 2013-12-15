@@ -185,6 +185,24 @@ class Monster(pygame.sprite.Sprite):
                 self.can_collide.remove(current_collision)
         pygame.event.pump()
 
+class Projectiles(pygame.sprite.Sprite):
+    def __init__(self, image):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = load_png(image)
+        self.image = pygame.transform.scale(self.image, (16, 16))
+        self.rect = self.image.rect
+        self.movepos = [0,0]
+        
+    def on_collision(self, sprite):
+        if sprite.state != "invulnerable" and sprite.state != "hit":
+            sprite.health -= 2
+            self.kill()
+        
+    def update(self, charactersprites):
+        move(self, charactersprites, [], self.movepos)
+        pygame.event.pump()
+
+
 class Sword(pygame.sprite.Sprite):
     def __init__(self, character):
         pygame.sprite.Sprite.__init__(self)
