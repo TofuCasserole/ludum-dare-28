@@ -329,10 +329,17 @@ def move(sprite, moveables, obstacles, movepos, realign = False):
         
 
 class Room:
-    def __init__(self, doors, obstacles=None, monsters=None):
+    def __init__(self, cord,doors=[], obstacles=None, monsters=None):
         self.doors = doors
+        self.connectingRooms={}#door:room -> NORTH:<roomObject>
         self.obstacles = obstacles
         self.monsters = monsters
+        self.cord=cord
+    def __str__(self):
+        return str(self.cord)+':'+str(self.connectingRooms)
+    def __repr__(self):
+        return self.__str__()
+    def generateWalls(self):
         possible_locations = [(x,y) for x in range(0, WIDTH) for y in range (0, LENGTH) if (x,y) not in self.obstacles]
         random.shuffle(possible_locations)
         for monster in self.monsters:
@@ -349,10 +356,10 @@ class Room:
             if not (y == 224 and WEST in doors):
                 self.walls.add(Obstacle((32, y), "wall.png"))
             if not (y == 224 and EAST in doors):
-                self.walls.add(Obstacle((608, y), "wall.png"))    
-    
+                self.walls.add(Obstacle((608, y), "wall.png"))
     def monster_locations(self):
         return [monster.location for monster in self.monsters]
+    
 
 cur_room_row = 0
 cur_room_col = 0
@@ -375,6 +382,7 @@ class Level:
         #print cords
         #convert the cords to rooms and make them a self contained graph
         self.rootRoom=''
+        self.rooms=[]#this is a temp var that will be used to generate the walls
         self.__generateRooms(cords)
     def __generateCords(self,cords={},queue=[]):
         if len(cords)>=self.numberOfRooms:
@@ -442,7 +450,10 @@ class Level:
         for exit in cords[currentCord]:
             if exit not in visited:
                 self.__generateRooms(cords, exit, rooms[exit], rooms, visited)
-
+        self.rooms=rooms
+    def __initWalls(self):
+        for room in self.rooms:
+            room.generateWalls()
     def __toString(self, room):
         s=''
         s+=room+':['
