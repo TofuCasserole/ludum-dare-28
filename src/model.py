@@ -340,10 +340,11 @@ class Room:
     def __repr__(self):
         return self.__str__()
     def generateWalls(self):
-        possible_locations = [(x,y) for x in range(0, WIDTH) for y in range (0, LENGTH) if (x,y) not in self.obstacles]
-        random.shuffle(possible_locations)
-        for monster in self.monsters:
-            monster.location = possible_locations.pop()
+	if self.obstacles!=None and self.monsters!=None:
+            possible_locations = [(x,y) for x in range(0, WIDTH) for y in range (0, LENGTH) if (x,y) not in self.obstacles]
+            random.shuffle(possible_locations)
+            for monster in self.monsters:
+                monster.location = possible_locations.pop()
         self.walls = pygame.sprite.RenderPlain()
         # generate north/south walls
         for x in range(32, 640, 32):
