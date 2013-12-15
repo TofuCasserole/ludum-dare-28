@@ -8,6 +8,11 @@ import pygame
 import model
 
 def blue_mnm(object, obstacles, moveables, character):
+    if object.state == "wander":
+        coords = object.rect.top, object.rect.left
+        
+        
+    
     if object.state == "hit":
         if object.hitcount < 15:
             object.hitcount += 1
