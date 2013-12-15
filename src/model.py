@@ -19,6 +19,7 @@ WIDTH = 13
 import os
 import random
 import pygame
+import main
 from pygame.locals import *
 
 #WOOOOOOO!!!!
@@ -253,17 +254,20 @@ class Door(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = location
         
-    def update(self, character):
+    def update(self, character, l):
         if pygame.sprite.collide_mask(self, character):
             if self.rect.left == 320 and self.rect.top == 0:
                 character.rect.y = 416
+                character.currentroom = l.getLocation(character.currentroom.connectingRooms['north'])
             elif self.rect.left == 320 and self.rect.top == 448:
                 character.rect.y = 32
+                character.currentroom = l.getLocation(character.currentroom.connectingRooms['south'])
             elif self.rect.top == 224 and self.rect.left == 32:
                 character.rect.x = 576
+                character.currentroom = l.getLocation(character.currentroom.connectingRooms['west'])
             elif self.rect.top == 224 and self.rect.left == 608:
                 character.rect.x = 64
-        
+                character.currentroom = l.getLocation(character.currentroom.connectingRooms['east'])
 '''
 doors are passed as an array of "east", "north", "south", and "west"
 
@@ -381,21 +385,21 @@ class Room:
         self.walls = pygame.sprite.RenderPlain()
         # generate north/south walls
         for x in range(32, 640, 32):
-            if not (x == 320 and NORTH in self.doors):
+            if not (x == 320 and NORTH in self.connectingRooms):
                 self.walls.add(Obstacle((x, 0), "wall.png"))
             else:
                 self.door_sprites.add(Door((320,0)))
-            if not (x == 320 and SOUTH in self.doors):
+            if not (x == 320 and SOUTH in self.connectingRooms):
                 self.walls.add(Obstacle((x, 448), "wall.png"))
             else:
                 self.door_sprites.add(Door((320,448)))
         # generate east/west walls
         for y in range(0, 480, 32):
-            if not (y == 224 and WEST in self.doors):
+            if not (y == 224 and WEST in self.connectingRooms):
                 self.walls.add(Obstacle((32, y), "wall.png"))
             else:
                 self.door_sprites.add(Door((32,224)))
-            if not (y == 224 and EAST in self.doors):
+            if not (y == 224 and EAST in self.connectingRooms):
                 self.walls.add(Obstacle((608, y), "wall.png"))
             else:
                 self.door_sprites.add(Door((608,224)))
@@ -413,10 +417,16 @@ class Level:
         self.SIZE=10
         self.levelGrid=[[-1]*self.SIZE for x in range(self.SIZE)]
         
-        self.numberOfRooms=random.randint(6,6)
+        self.numberOfRooms=random.randint(10,15)
         self.rootRoom=(self.SIZE/2,self.SIZE/2)
         self.generateLevel()
-    
+        self.generateWalls()
+        self.printGrid()
+    def generateWalls(self):
+        for i in range(self.SIZE):
+            for j in range(self.SIZE):
+                if isinstance(self.levelGrid[i][j],Room):
+                    self.levelGrid[i][j].generateWalls()
     def getLocation(self, gridCords):
         return self.levelGrid[gridCords[0]][gridCords[1]]
 
@@ -434,6 +444,7 @@ class Level:
             currentY=currentPlace[1]
             #generate some exits
             exits=self.generateExits(currentPlace)
+            print("Current Room:", currentPlace)
             for i in range(4):
                 if exits[i]==-1:
                     continue
@@ -443,13 +454,15 @@ class Level:
                     self.levelGrid[x][y]=Room(exits[i])
                     queue.append(exits[i])
                     count+=1
-                #add the direcitons to room.doors
-                #self.levelGrid[currentX][currentY].doors.append(direction[i])
-                #self.levelGrid[x][y].doors.append(inverseDirection[i])
                 #add the room to the connectedrooms dict
                 self.levelGrid[currentX][currentY].connectingRooms[direction[i]]=exits[i]
                 self.levelGrid[x][y].connectingRooms[inverseDirection[i]]=currentPlace
             #now we need to goto the next place in the queue, if its empty idk what we are going to do..
+            
+            self.levelGrid[currentX][currentY].doors = []
+            for room in self.levelGrid[currentX][currentY].connectingRooms:
+                self.levelGrid[currentX][currentY].doors.append(room)
+            print "Neighbors:", self.levelGrid[currentX][currentY].doors
             if len(queue)>0:
                 currentPlace=queue.pop(0)
             else:
@@ -484,6 +497,7 @@ class Level:
                     if not bool(random.randint(0,1)):
                         newRooms[i]=-1
                         continue
+        print(newRooms)
         return newRooms
                 
     def printGrid(self):
@@ -492,6 +506,8 @@ class Level:
             for j in range(self.SIZE):
                 if self.levelGrid[i][j]==-1:
                     line+='.'
+                elif (i,j)==self.rootRoom:
+                    line+='!'
                 else:
                     line+='*'
             print line
