@@ -29,9 +29,9 @@ def load_png(name):
     try:
         image = pygame.image.load(fullname)
         if image.get_alpha() is None:
-            image = pygame.transform.scale(image.convert(), (32, 32))
+            image = pygame.transform.scale(image.convert(), (30, 30))
         else:
-            image = pygame.transform.scale(image.convert_alpha(), (32, 32))
+            image = pygame.transform.scale(image.convert_alpha(), (30, 30))
     except pygame.error, message:
             print 'Cannot load image:', fullname
             raise SystemExit, message
@@ -227,8 +227,8 @@ class Obstacle(pygame.sprite.Sprite):
 class Door(pygame.sprite.Sprite):
     def __init__(self, xpos, ypos):
         pygame.sprite.Sprite.__init__(self)
-        self.rect.x = xpos
-        self.rect.y = ypos
+        self.rect.left = xpos
+        self.rect.top = ypos
         self.rect.w = 32
         self.rect.h = 32
         
@@ -337,6 +337,7 @@ class Room:
         self.obstacles = pygame.sprite.RenderUpdates()
         self.monsters = pygame.sprite.RenderUpdates()
         self.walls = pygame.sprite.RenderUpdates()
+        self.door_sprites = pygame.sprite.RenderUpdates()
         self.cord=cord
     def __str__(self):
         return str(self.cord)+':'+str(self.connectingRooms)
@@ -439,13 +440,17 @@ class Level:
             direction=''
             #we need to figure out what direction this door is at
             if exit[0]>currentCord[0]:#exit is EAST
-                direction='EAST'
+                direction=EAST
+                currentRoom.door_sprites.add(Door(608,224))
             elif exit[0]<currentCord[0]:#exit is WEST
-                direction='WEST'
+                direction=WEST
+                currentRoom.door_sprites.add(Door(0,224))
             elif exit[1]>currentCord[1]:#exit is SOUTH
-                direction='SOUTH'
+                direction=SOUTH
+                currentRoom.door_sprites.add(Door(320,448))
             elif exit[1]<currentCord[1]:#exit is NORTH
-               direction='NORTH'
+                direction=NORTH
+                currentRoom.door_sprites.add(Door(320,0))
             #add this to the doors list
             currentRoom.doors.append(direction)
             #check to see if a room exists, if not add it
