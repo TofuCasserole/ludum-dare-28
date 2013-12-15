@@ -375,7 +375,7 @@ class Room:
         return str(self.cord)+':'+str(self.connectingRooms)
     def __repr__(self):
         return self.__str__()
-    def generate_walls(self):
+    def generateWalls(self):
         print(self.doors)
         if self.obstacles!=None and self.monsters!=None:
             possible_locations = [(x,y) for x in range(0, WIDTH) for y in range (0, LENGTH) if (x,y) not in self.obstacles]

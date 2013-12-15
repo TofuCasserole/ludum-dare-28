@@ -134,7 +134,7 @@ def main():
         monsters.update(obstacles, moveables, character)
         monsters.draw(screen)
         obstacles.draw(screen)
-        currentroom.door_sprites.update(character)
+        currentroom.door_sprites.update(character, l)
         sword.draw(screen)
         pygame.display.flip()
 
