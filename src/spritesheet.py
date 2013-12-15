@@ -8,8 +8,8 @@
 import pygame
  
 class SpriteSheet(object):
-    def __init__(self, image):
-        self.sheet = image
+    def __init__(self, image, size):
+        self.sheet = pygame.transform.scale(image, size)
     # Load a specific image from a specific rectangle
     def image_at(self, rectangle, colorkey = None):
         "Loads image from x,y,x+offset,y+offset"

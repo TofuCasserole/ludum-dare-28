@@ -21,8 +21,6 @@ import random
 import pygame
 from pygame.locals import *
 
-#WOOOOOOO!!!!
-
 def load_png(name):
     """ Load image and return image object"""
     fullname = os.path.join('../', 'res', name)
