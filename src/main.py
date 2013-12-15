@@ -41,7 +41,7 @@ def main():
     for room in l.getAllRooms():
         room.add_monsters(charactersprites)
     
-    obstacles.add(currentroom.walls)
+    obstacles.add(character.currentroom.walls)
     
     while True:
         clock.tick(40)

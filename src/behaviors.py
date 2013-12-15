@@ -9,12 +9,17 @@ import model
 
 def blue_mnm(object, obstacles, moveables, character):
     if object.state == "hit":
-            if object.hitcount < 15:
-                object.hitcount += 1
-            else:
-                object.hitcount = 0
-                object.state = "chase"
-    
+        if object.hitcount < 15:
+            object.hitcount += 1
+        else:
+            object.hitcount = 0
+            object.state = "chase"
+            for current_collisions in pygame.sprite.spritecollide(object, moveables,0):
+                object.can_collide.add(current_collisions)
+        model.move(object, moveables, obstacles, object.movepos)
+        pygame.event.pump()
+        return
+            
     if object.state == "pushback":
         if object.pushcount < 2:
             object.pushcount += 1
@@ -35,6 +40,10 @@ def blue_mnm(object, obstacles, moveables, character):
             object.movepos[0] = 3
         else:
             object.movepos[0] = 0
-        
+    
+    
     model.move(object, moveables, obstacles, object.movepos)
+    for current_collision in object.can_collide.sprites():
+        if not current_collision in pygame.sprite.spritecollide(object, moveables, 0):
+            object.can_collide.remove(current_collision)
     pygame.event.pump()
