@@ -3,7 +3,7 @@ Created on Dec 13, 2013
 
 @author: thedoctor
 '''
-DALEK = 0
+MnM = 0
 CYBERMAN = 1
 WEEPINGANGELS = 2
 SILENCE = 3
@@ -66,7 +66,8 @@ class Character(pygame.sprite.Sprite):
             return self.movepos
         
     def on_collision(self, sprite):
-        pass
+        if self.state == "move" and isinstance(sprite, Monster):
+            self.health -= sprite.strength
         
     def update(self, obstacles, moveables):
         self.sword_cooldown += 1
@@ -89,7 +90,7 @@ class Character(pygame.sprite.Sprite):
         
 
 class Monster(pygame.sprite.Sprite):
-    def __init__(self, character, obstacles, monsters):
+    def __init__(self, character, obstacles, monsters, type):
         pygame.sprite.Sprite.__init__(self)
         self.image = load_png('slime.png')
         self.image = pygame.transform.scale2x(self.image)
@@ -105,6 +106,10 @@ class Monster(pygame.sprite.Sprite):
         self.movepos = [0,0]
         self.hitcount = 0
         self.pushcount = 0
+        if type == MnM:
+            self.health = 20
+            self.strength = 2
+            
      
     def getmovepos(self):
         return self.movepos
@@ -144,15 +149,15 @@ class Monster(pygame.sprite.Sprite):
         
         if self.state == "chase":
             if self.rect.top > character.rect.top:
-                self.movepos[1] = -2
+                self.movepos[1] = -3
             elif self.rect.bottom < character.rect.bottom:
-                self.movepos[1] = 2
+                self.movepos[1] = 3
             else:
                 self.movepos[1] = 0
             if self.rect.left > character.rect.left:
-                self.movepos[0] = -2
+                self.movepos[0] = -3
             elif self.rect.right < character.rect.right:
-                self.movepos[0] = 2
+                self.movepos[0] = 3
             else:
                 self.movepos[0] = 0
                 
@@ -166,6 +171,7 @@ class Sword(pygame.sprite.Sprite):
         self.image = pygame.transform.scale2x(self.image)
         self.rect = self.image.get_rect()
         self.rotate = 90
+        self.strength = 7
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         if character.last_direction_moved == "right":
@@ -209,13 +215,20 @@ class Sword(pygame.sprite.Sprite):
             self.rect.midtop = character.rect.midbottom
         for monster in pygame.sprite.spritecollide(self, monsters, 0):
             monster.state = "pushback"
+            monster.health -= self.strength
+            if monster.health <= 0:
+                monster.kill()
             if character.last_direction_moved == "right":
+                monster.rect.left = self.rect.right
                 monster.movepos = [16, 0]
             elif character.last_direction_moved == "left":
+                monster.rect.right = self.rect.left
                 monster.movepos = [-16, 0]
             elif character.last_direction_moved == "down":
+                monster.rect.top = self.rect.bottom
                 monster.movepos = [0, 16]
             elif character.last_direction_moved == "up":
+                monster.rect.bottom = self.rect.top
                 monster.movepos = [0, -16]
         self.count += 1
 
@@ -233,8 +246,8 @@ class Obstacle(pygame.sprite.Sprite):
 class Door(pygame.sprite.Sprite):
     def __init__(self, location):
         pygame.sprite.Sprite.__init__(self)
-        self.image = load_png('door.png')
-        self.image = pygame.transform.scale2x(self.image)
+        self.image = load_png('char.png')
+        self.image = pygame.transform.scale(self.image, (32, 32))
         self.rect = self.image.get_rect()
         self.rect.topleft = location
         
