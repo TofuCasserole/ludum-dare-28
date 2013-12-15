@@ -41,8 +41,6 @@ class Character(pygame.sprite.Sprite):
         self.image, self.rect = load_png('char.png')
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
-        self.rect.midleft = self.area.midleft
-        self.rect = self.rect.move((64,0))
         self.health = 100
         #self.room = start_room
         self.movepos = [0,0]
@@ -55,35 +53,72 @@ class Character(pygame.sprite.Sprite):
         self.hitcount = 0
         self.invuln_count = 0
         self.hitmove = [0,0]
-        self.sword_cooldown = 30
-    
-    def getmovepos(self):
-        if self.state == "hit":
-            return self.hitmove
-        else:
-            return self.movepos
         
-    def on_collision(self, sprite):
-        pass
-            
-    def update(self, obstacles, moveables):
-        self.sword_cooldown += 1
-        
+    def update(self, obstacles, monsters):
         if self.state == "hit":
-            if self.hitcount < 15:
+            if self.hitcount < 30:
                 self.hitcount += 1
             else:
                 self.state = "invulnerable"
                 self.hitcount = 0
         
+            newpos = self.rect.move([self.hitmove[0], 0])
+            if self.area.contains(newpos):
+                self.rect = newpos
+                for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
+                    if self.hitmove[0] > 0 and self.rect.right > obstacle.rect.left:
+                        self.rect.right = obstacle.rect.left
+                    if self.hitmove[0] < 0 and self.rect.left < obstacle.rect.right:
+                        self.rect.left = obstacle.rect.right
+            
+            
+            newpos = self.rect.move([0, self.hitmove[1]])
+            if self.area.contains(newpos):
+                self.rect = newpos
+                for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
+                    if self.hitmove[1] > 0 and self.rect.bottom > obstacle.rect.top:
+                        self.rect.bottom = obstacle.rect.top
+                    if self.hitmove[1] < 0 and self.rect.top < obstacle.rect.bottom:
+                        self.rect.top = obstacle.rect.bottom
+            pygame.event.pump()
+            return
+        
         if self.state == "invulnerable":
-            if self.invuln_count < 10:
+            if self.invuln_count < 20:
                 self.invuln_count += 1
             else:
                 self.invuln_count = 0
                 self.state = "move"
-                
-        move(self, moveables, obstacles, self.getmovepos())
+        
+        newpos = self.rect.move([self.movepos[0], 0])
+        if self.area.contains(newpos):
+            self.rect = newpos
+        for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
+            if self.movepos[0] > 0 and self.rect.right > obstacle.rect.left:
+                self.rect.right = obstacle.rect.left
+            if self.movepos[0] < 0 and self.rect.left < obstacle.rect.right:
+                self.rect.left = obstacle.rect.right
+        #if self.state == "invulnerable":
+        for obstacle in pygame.sprite.spritecollide(self, monsters, 0):
+            if self.movepos[0] > 0 and self.rect.right > obstacle.rect.left:
+                self.rect.right = obstacle.rect.left
+            if self.movepos[0] < 0 and self.rect.left < obstacle.rect.right:
+                self.rect.left = obstacle.rect.right
+            
+        newpos = self.rect.move([0, self.movepos[1]])
+        if self.area.contains(newpos):
+            self.rect = newpos
+        for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
+            if self.movepos[1] > 0 and self.rect.bottom > obstacle.rect.top:
+                self.rect.bottom = obstacle.rect.top
+            if self.movepos[1] < 0 and self.rect.top < obstacle.rect.bottom:
+                self.rect.top = obstacle.rect.bottom
+        #if self.state == "invulnerable":
+        for obstacle in pygame.sprite.spritecollide(self, monsters, 0):
+            if self.movepos[1] > 0 and self.rect.bottom > obstacle.rect.top:
+                self.rect.bottom = obstacle.rect.top
+            if self.movepos[1] < 0 and self.rect.top < obstacle.rect.bottom:
+                self.rect.top = obstacle.rect.bottom
         pygame.event.pump()
         
 
@@ -94,52 +129,24 @@ class Monster(pygame.sprite.Sprite):
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         random.seed()
-        self.rect.topleft = (random.randint(0,self.area.right-32), random.randint(0,self.area.bottom-32))
+        self.rect.topleft = (random.randint(0,self.area.right-64), random.randint(0,self.area.bottom-64))
         while (pygame.sprite.spritecollide(self, character, 0) != [] or pygame.sprite.spritecollide(self, obstacles, 0) != []
                or pygame.sprite.spritecollide(self, monsters, 0) != []):
             self.rect.topleft = (random.randint(0,self.area.right), random.randint(0,self.area.bottom))
         self.state = "chase"
         self.movepos = [0,0]
         self.hitcount = 0
-        self.pushcount = 0
         
-    def getmovepos(self):
-        return self.movepos
-    
-    def on_collision(self, sprite):
-        if isinstance(sprite, Character):
-            if (sprite.state == "move"):
-                sprite.hitmove[0] = self.movepos[0]/2
-                sprite.hitmove[1] = self.movepos[1]/2
-                sprite.state = "hit"
-            if (self.state != "hit"):
-                self.movepos[0] = 0
-                self.movepos[1] = 0
-                self.state = "hit"
-        '''if isinstance(sprite, Monster):
-            if (self.state == "hit" and sprite.state != "hit"):
-                sprite.movepos[0] = self.movepos[0]
-                sprite.movepos[1] = self.movepos[1]
-                sprite.state = "hit"
-                sprite.hitcount = self.hitcount'''   
-            
-        
-    def update(self, obstacles, moveables, character):
+    def update(self, obstacles, monsters, character):
         if self.state == "hit":
-            if self.hitcount < 15:
+            if self.hitcount < 30:
                 self.hitcount += 1
             else:
                 self.hitcount = 0
                 self.state = "chase"
-        
-        if self.state == "pushback":
-            if self.pushcount < 2:
-                self.pushcount += 1
-            else:
-                self.pushcount = 0
-                self.state = "chase"
                 
         if self.state == "chase":
+            self.moveclock = 0
             if self.rect.top > character.rect.top:
                 self.movepos[1] = -2
             elif self.rect.bottom < character.rect.bottom:
@@ -153,66 +160,192 @@ class Monster(pygame.sprite.Sprite):
             else:
                 self.movepos[0] = 0
                 
-        move(self, moveables, obstacles, self.movepos)
-    
+        newpos = self.rect.move([self.movepos[0], 0])
+        if self.area.contains(newpos):
+            self.rect = newpos
+        for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
+            if obstacle == self:
+                continue
+            if self.movepos[0] > 0 and self.rect.right > obstacle.rect.left:
+                self.rect.right = obstacle.rect.left
+                for monster in pygame.sprite.spritecollide(self, monsters, 0):
+                    if monster == self:
+                        continue
+                    if self.rect.left < monster.rect.right:
+                        monster.rect.right = self.rect.left
+            if self.movepos[0] < 0 and self.rect.left < obstacle.rect.right:
+                self.rect.left = obstacle.rect.right
+                for monster in pygame.sprite.spritecollide(self, monsters, 0):
+                    if monster == self:
+                        continue
+                    if self.rect.right > monster.rect.left:
+                        monster.rect.left = self.rect.right
+        if self.state != "hit":
+            for obstacle in pygame.sprite.spritecollide(self, monsters, 0):
+                if obstacle == self:
+                    continue
+                if self.movepos[0] > 0 and self.rect.right > obstacle.rect.left:
+                    self.rect.right = obstacle.rect.left
+                    for monster in pygame.sprite.spritecollide(self, monsters, 0):
+                        if monster == self:
+                            continue
+                        if self.rect.left < monster.rect.right:
+                            monster.rect.right = self.rect.left
+                if self.movepos[0] < 0 and self.rect.left < obstacle.rect.right:
+                    self.rect.left = obstacle.rect.right
+                    for monster in pygame.sprite.spritecollide(self, monsters, 0):
+                        if monster == self:
+                            continue
+                        if self.rect.right > monster.rect.left:
+                            monster.rect.left = self.rect.right
+        if self.state == "hit":
+            for obstacle in pygame.sprite.spritecollide(self, monsters, 0):
+                if obstacle == self:
+                    continue
+                if self.movepos[0] > 0 and self.rect.right > obstacle.rect.left:
+                    obstacle.state = "hit"
+                    obstacle.hitcount = self.hitcount
+                    obstacle.movepos[0] = self.movepos[0]
+                    obstacle.rect.left = self.rect.right
+                if self.movepos[0] < 0 and self.rect.left < obstacle.rect.right:
+                    obstacle.state = "hit"
+                    obstacle.hitcount = self.hitcount
+                    obstacle.movepos[0] = self.movepos[0]
+                    obstacle.rect.right = self.rect.left
+        
+        if pygame.sprite.collide_rect(self, character) and self.state != "hit" and character.state != "invulnerable":
+            character.state = "hit"
+            character.hitmove[0] = self.movepos[0]/2
+            character.hitmove[1] = self.movepos[1]/2
+            self.state = "hit"
+            if self.movepos[0] > 0:
+                self.rect.right = character.rect.left
+                for monster in pygame.sprite.spritecollide(self, monsters, 0):
+                    if monster == self:
+                        continue
+                    if self.rect.left < monster.rect.right:
+                        monster.rect.right = self.rect.left
+            if self.movepos[0] < 0:
+                self.rect.left = character.rect.right
+                for monster in pygame.sprite.spritecollide(self, monsters, 0):
+                    if monster == self:
+                        continue
+                    if self.rect.right > monster.rect.left:
+                        monster.rect.left = self.rect.right
+            self.movepos[0] *=  -1/2
+            self.movepos[1] *= -1/2
+        elif pygame.sprite.collide_rect(self, character):
+            self.state = "hit"
+            self.movepos[0] *=  -1/2
+            self.movepos[1] *= -1/2
+            
+        newpos = self.rect.move([0, self.movepos[1]])
+        if self.area.contains(newpos):
+            self.rect = newpos
+        for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
+            if obstacle == self:
+                continue
+            if self.movepos[1] > 0 and self.rect.bottom > obstacle.rect.top:
+                self.rect.bottom = obstacle.rect.top
+                for monster in pygame.sprite.spritecollide(self, monsters, 0):
+                    if monster == self:
+                        continue
+                    if self.rect.top < monster.rect.bottom:
+                        monster.rect.bottom = self.rect.top
+            if self.movepos[1] < 0 and self.rect.top < obstacle.rect.bottom:
+                self.rect.top = obstacle.rect.bottom
+                for monster in pygame.sprite.spritecollide(self, monsters, 0):
+                    if monster == self:
+                        continue
+                    if self.rect.bottom > monster.rect.top:
+                        monster.rect.top = self.rect.bottom
+        if self.state != "hit":
+            for obstacle in pygame.sprite.spritecollide(self, monsters, 0):
+                if obstacle == self:
+                    continue
+                if self.movepos[1] > 0 and self.rect.bottom > obstacle.rect.top:
+                    self.rect.bottom = obstacle.rect.top
+                    for monster in pygame.sprite.spritecollide(self, monsters, 0):
+                        if monster == self:
+                            continue
+                        if self.rect.top < monster.rect.bottom:
+                            monster.rect.bottom = self.rect.top
+                if self.movepos[1] < 0 and self.rect.top < obstacle.rect.bottom:
+                    self.rect.top = obstacle.rect.bottom
+                    for monster in pygame.sprite.spritecollide(self, monsters, 0):
+                        if monster == self:
+                            continue
+                        if self.rect.bottom > monster.rect.top:
+                            monster.rect.top = self.rect.self
+        if self.state == "hit":
+            for obstacle in pygame.sprite.spritecollide(self, monsters, 0):
+                if obstacle == self:
+                    continue
+                if obstacle.movepos[1] > 0 and self.rect.bottom > obstacle.rect.top:
+                    obstacle.state = "hit"
+                    obstacle.hitcount = self.hitcount
+                    obstacle.movepos[1] = self.movepos[1]
+                    obstacle.rect.top = self.rect.bottom
+                if self.movepos[1] < 0 and self.rect.top < obstacle.rect.bottom:
+                    obstacle.state = "hit"
+                    obstacle.hitcount = self.hitcount
+                    obstacle.movepos[1] = self.movepos[1]
+                    obstacle.rect.bottom = self.rect.top
+        if pygame.sprite.collide_rect(self, character) and self.state != "hit" and character.state != "invulnerable":
+            character.state = "hit"
+            character.hitmove[0] = self.movepos[0]/2
+            character.hitmove[1] = self.movepos[1]/2
+            self.state = "hit"
+            if self.movepos[1] > 0:
+                self.rect.bottom =  character.rect.top
+                for monster in pygame.sprite.spritecollide(self, monsters, 0):
+                    if monster == self:
+                        continue
+                    if self.rect.top < monster.rect.bottom:
+                        monster.rect.bottom = self.rect.top
+            if self.movepos[1] < 0:
+                self.rect.top = character.rect.bottom
+                for monster in pygame.sprite.spritecollide(self, monsters, 0):
+                    if monster == self:
+                        continue
+                    if self.rect.bottom > monster.rect.top:
+                        monster.rect.top = self.rect.bottom
+            self.movepos[0] *=  -1/2
+            self.movepos[1] *= -1/2
+        elif pygame.sprite.collide_rect(self, character):
+            self.state = "hit"
+            self.movepos[0] *=  -1/2
+            self.movepos[1] *= -1/2
         pygame.event.pump()
 
 class Sword(pygame.sprite.Sprite):
-    def __init__(self, character):
+    def __init(self, character):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('sword.png')
-        self.rotate = 90
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         if character.last_direction_moved == "right":
-            self.image = pygame.transform.rotate(self.image, 270-self.rotate)
-            self.rotate = 270
             self.rect.midleft = character.rect.midright
         if character.last_direction_moved == "left":
-            self.image = pygame.transform.rotate(self.image, 90-self.rotate)
-            self.rotate = 90
             self.rect.midright = character.rect.midleft
         if character.last_direction_moved == "up":
-            self.image = pygame.transform.rotate(self.image, 0-self.rotate)
-            self.rotate = 0
             self.rect.midbottom = character.rect.midtop
         if character.last_direction_moved == "down":
-            self.image = pygame.transform.rotate(self.image, 180-self.rotate)
-            self.rotate = 180
             self.rect.midtop = character.rect.midbottom
         self.count = 0
         
-    def update(self, character, monsters):
+    def update(self, character):
         if self.count > 20:
             self.kill()
-            character.sword_cooldown = 0
             return
         if character.last_direction_moved == "right":
-            self.image = pygame.transform.rotate(self.image, 270-self.rotate)
-            self.rotate = 270
             self.rect.midleft = character.rect.midright
         if character.last_direction_moved == "left":
-            self.image = pygame.transform.rotate(self.image, 90-self.rotate)
-            self.rotate = 90
             self.rect.midright = character.rect.midleft
         if character.last_direction_moved == "up":
-            self.image = pygame.transform.rotate(self.image, 0-self.rotate)
-            self.rotate = 0
             self.rect.midbottom = character.rect.midtop
         if character.last_direction_moved == "down":
-            self.image = pygame.transform.rotate(self.image, 180-self.rotate)
-            self.rotate = 180
             self.rect.midtop = character.rect.midbottom
-        for monster in pygame.sprite.spritecollide(self, monsters, 0):
-            monster.state = "pushback"
-            if character.last_direction_moved == "right":
-                monster.movepos = [16, 0]
-            elif character.last_direction_moved == "left":
-                monster.movepos = [-16, 0]
-            elif character.last_direction_moved == "down":
-                monster.movepos = [0, 16]
-            elif character.last_direction_moved == "up":
-                monster.movepos = [0, -16]
         self.count += 1
 
 class Obstacle(pygame.sprite.Sprite):
@@ -221,21 +354,7 @@ class Obstacle(pygame.sprite.Sprite):
         self.image, self.rect = load_png(sprite)
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
-    
         self.rect.topleft = location
-
-class Door(pygame.sprite.Sprite):
-    def __init__(self, xpos, ypos):
-        pygame.sprite.Sprite.__init__(self)
-        self.rect.x = xpos
-        self.rect.y = ypos
-        self.rect.w = 32
-        self.rect.h = 32
-        
-    def update(self, character):
-        if pygame.sprite.collide_mask(self, character):
-            print("Door registered!")
-        
 '''
 doors are passed as an array of "east", "north", "south", and "west"
 
@@ -253,88 +372,46 @@ unlocated monster objects are passed as an array on construction
 '''
 random.seed()
 
-def move(sprite, moveables, obstacles, movepos, realign = False):
-    newpos = sprite.rect.move([movepos[0], 0])
-    if sprite.area.contains(newpos) and not realign:
+def move(sprite, moveables, obstacles, movepos, reallign = False):
+    oldpos = sprite.rect
+    newpos = sprite.rect.move[(movepos[0], 0)]
+    if sprite.area.contains(newpos) and not reallign:
         sprite.rect = newpos
-    for obstacle in pygame.sprite.spritecollide(sprite, obstacles, 0):
+    for obstacle in pygame.sprite.spritecollide(sprite, obstacles):
         if movepos[0] > 0 and sprite.rect.right > obstacle.rect.left:
             sprite.rect.right = obstacle.rect.left
             for moveable in pygame.sprite.spritecollide(sprite, moveables, 0):
-                if moveable == sprite:
-                    continue
                 move(moveable, moveables, obstacles, moveable.getmovepos(), True)
         if movepos[0] < 0 and sprite.rect.left < obstacle.rect.right:
             sprite.rect.left = obstacle.rect.right
             for moveable in pygame.sprite.spritecollide(sprite, moveables, 0):
-                if moveable == sprite:
-                    continue
                 move(moveable, moveables, obstacles, moveable.getmovepos(), True)
-    for moveable in pygame.sprite.spritecollide(sprite, moveables, 0):
+    for moveable in pygame.sprite.spritecollide(sprite, moveables):
         if moveable == sprite:
             continue
-        if movepos[0] > 0 and sprite.rect.right > moveable.rect.left:
+        if movepos[0] > sprite.rect.right > moveable.left:
             sprite.rect.right = moveable.rect.left
             sprite.on_collision(moveable)
-            moveable.on_collision(sprite)
-            for moveable2 in pygame.sprite.spritecollide(sprite, moveables, 0):
-                if moveable2 == sprite:
-                    continue
-                move(moveable2, moveables, obstacles, moveable2.getmovepos(), True)
-        if movepos[0] < 0 and sprite.rect.left < moveable.rect.right:
-            sprite.rect.left = moveable.rect.right
-            sprite.on_collision(moveable)
-            moveable.on_collision(sprite)
-            for moveable2 in pygame.sprite.spritecollide(sprite, moveables, 0):
-                if moveable2 == sprite:
-                    continue
-                move(moveable2, moveables, obstacles, moveable2.getmovepos(), True)
-    newpos = sprite.rect.move([0, movepos[1]])
-    if sprite.area.contains(newpos) and not realign:
-        sprite.rect = newpos
-    for obstacle in pygame.sprite.spritecollide(sprite, obstacles, 0):
-        if movepos[1] > 0 and sprite.rect.bottom > obstacle.rect.top:
-            sprite.rect.bottom = obstacle.rect.top
             for moveable in pygame.sprite.spritecollide(sprite, moveables, 0):
-                if moveable == sprite:
-                    continue
-                move(moveable, moveables, obstacles, moveable.getmovepos(), True)
-        if movepos[1] < 0 and sprite.rect.top < obstacle.rect.bottom:
-            sprite.rect.top = obstacle.rect.bottom
-            for moveable in pygame.sprite.spritecollide(sprite, moveables, 0):
-                if moveable == sprite:
-                    continue
-                move(moveable, moveables, obstacles, moveable.getmovepos(), True)
-    for moveable in pygame.sprite.spritecollide(sprite, moveables, 0):
-        if moveable == sprite:
-            continue
-        if movepos[1] > 0 and sprite.rect.bottom > moveable.rect.top:
-            sprite.rect.bottom = moveable.rect.top
-            sprite.on_collision(moveable)
-            moveable.on_collision(sprite)
-            for moveable2 in pygame.sprite.spritecollide(sprite, moveables, 0):
-                if moveable2 == sprite:
-                    continue
-                move(moveable2, moveables, obstacles, moveable2.getmovepos(), True)
-        if movepos[1] < 0 and sprite.rect.top < moveable.rect.bottom:
-            sprite.rect.top = moveable.rect.bottom
-            sprite.on_collision(moveable)
-            moveable.on_collision(sprite)
-            for moveable2 in pygame.sprite.spritecollide(sprite, moveables, 0):
-                if moveable2 == sprite:
-                    continue
-                move(moveable2, moveables, obstacles, moveable2.getmovepos(), True)
-    
+                move(moveable, moveables, moveable.getmovepos(), True)
+            
         
     
         
         
 
 class Room:
-    def __init__(self, doors, obstacles=None, monsters=None):
+    def __init__(self, cord,doors=[], obstacles=None, monsters=None):
         self.doors = doors
+        self.connectingRooms={}#door:room -> NORTH:<roomObject>
         self.obstacles = obstacles
         self.monsters = monsters
+        self.cord=cord
+    def __str__(self):
+        return str(self.cord)+':'+str(self.connectingRooms)
+    def __repr__(self):
+        return self.__str__()
+        '''
         possible_locations = [(x,y) for x in range(0, WIDTH) for y in range (0, LENGTH) if (x,y) not in self.obstacles]
         random.shuffle(possible_locations)
         for monster in self.monsters:
@@ -351,10 +428,114 @@ class Room:
             if not (y == 224 and WEST in doors):
                 self.walls.add(Obstacle((32, y), "wall.png"))
             if not (y == 224 and EAST in doors):
-                self.walls.add(Obstacle((608, y), "wall.png"))    
-    
+                self.walls.add(Obstacle((608, y), "wall.png"))
+                
+    def initConnectingRooms(self):
+        for door in self.doors:
+            self.connectingRooms[door]=''
     def monster_locations(self):
         return [monster.location for monster in self.monsters]
-
+    '''
 cur_room_row = 0
 cur_room_col = 0
+
+'''
+The level class contains all of the rooms for this specific level in a linked list
+'''
+class Level:
+    def __init__(self):
+        self.directions={0:'NORTH',1:'SOUTH',2:'EAST',3:'WEST'}
+        #self.cords={}#cord:[exit cords]
+        #figure out how many rooms we are going to generate
+        self.numberOfRooms=random.randint(10,15)
+        #generate the cords of the rooms
+        print 'generating cords'
+        cords=self.__generateCords()
+        while cords==None:
+            print 'generating cords'
+            cords=self.__generateCords()
+        #print len(cords)
+        #print cords
+        #convert the cords to rooms and make them a self contained graph
+        self.rootRoom=''
+        self.__generateRooms(cords)
+    def __generateCords(self,cords={},queue=[]):
+        if len(cords)>=self.numberOfRooms:
+            return cords
+        if len(cords)==0:
+            cords[(0,0)]=[]#generate the init cord with no exits
+            currentCord=(0,0)
+        else:
+            if len(queue)>0:
+                currentCord=queue.pop(0)
+            else:
+                print len(cords)
+                return None #we need to throw this one out and try again...
+        #find some exits!
+        exits=self.__generateExits(currentCord)
+        #check to see if these cords already exits
+        for exit in exits:
+            if exit not in cords:
+                cords[exit]=[currentCord]#room doesnt exist so lets add it and add the currentCord as an exit
+                #since this is a new room lets add it to the queue!
+                queue.append(exit)
+            else:#since the cord already exits lets add the currentCord as an exit    
+                cords[exit].append(currentCord) 
+            cords[currentCord].append(exit)#append the exit the the current cord
+        #time to call this function again!
+        return self.__generateCords(cords, queue)
+    def __generateExits(self, currentCord):
+        exits=[]
+        directions=[-1,1,1,-1]
+        #0 north, 1 east, 2 south, 3 west
+        for i in range(0,4):
+            if bool(random.randint(0,1)):
+                if i%2==0: #north or south Y cord
+                    exits.append((currentCord[0],currentCord[1]+directions[i]))
+                else: #east or west, X cord
+                    exits.append((currentCord[0]+directions[i],currentCord[1]))
+        return exits
+    def __generateRooms(self,cords, currentCord=(0,0), currentRoom=None, rooms={}, visited=[]):
+        #we need to traverse the cords to generate the rooms
+        #start by creating the root room
+        if currentCord==(0,0):
+            self.rootRoom=Room(currentCord)
+            currentRoom=self.rootRoom
+            rooms[(0,0)]=self.rootRoom
+        #time to iterate through all of the exits, create the rooms if needed, and connect them
+        for exit in cords[currentCord]:
+            direction=''
+            #we need to figure out what direction this door is at
+            if exit[0]>currentCord[0]:#exit is EAST
+                direction='EAST'
+            elif exit[0]<currentCord[0]:#exit is WEST
+                direction='WEST'
+            elif exit[1]>currentCord[1]:#exit is SOUTH
+                direction='SOUTH'
+            elif exit[1]<currentCord[1]:#exit is NORTH
+               direction='NORTH'
+            #add this to the doors list
+            currentRoom.doors.append(direction)
+            #check to see if a room exists, if not add it
+            if exit not in rooms:
+                rooms[exit]=Room(exit)
+            currentRoom.connectingRooms[direction]=rooms[exit]
+        #now that we have created some rooms lets go through each of the exits again and recurvsively create the rooms
+        visited.append(currentCord)
+        for exit in cords[currentCord]:
+            if exit not in visited:
+                self.__generateRooms(cords, exit, rooms[exit], rooms, visited)
+
+    def __toString(self, room):
+        s=''
+        s+=room+':['
+        for key in room.connectingRooms:
+            pass
+    def __str__(self):
+        
+        return self.rootRoom.__str__()
+    def __repr__(self):
+        self.__str__()
+l=Level()
+print l
+
