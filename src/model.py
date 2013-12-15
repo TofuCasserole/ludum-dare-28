@@ -225,12 +225,10 @@ class Obstacle(pygame.sprite.Sprite):
         self.rect.topleft = location
 
 class Door(pygame.sprite.Sprite):
-    def __init__(self, xpos, ypos):
+    def __init__(self, location):
         pygame.sprite.Sprite.__init__(self)
-        self.rect.left = xpos
-        self.rect.top = ypos
-        self.rect.w = 32
-        self.rect.h = 32
+        self.image, self.rect = load_png('rock.png')
+        self.rect.topleft = location
         
     def update(self, character):
         if pygame.sprite.collide_mask(self, character):
@@ -441,16 +439,16 @@ class Level:
             #we need to figure out what direction this door is at
             if exit[0]>currentCord[0]:#exit is EAST
                 direction=EAST
-                currentRoom.door_sprites.add(Door(608,224))
+                currentRoom.door_sprites.add(Door((608,224)))
             elif exit[0]<currentCord[0]:#exit is WEST
                 direction=WEST
-                currentRoom.door_sprites.add(Door(0,224))
+                currentRoom.door_sprites.add(Door((32,224)))
             elif exit[1]>currentCord[1]:#exit is SOUTH
                 direction=SOUTH
-                currentRoom.door_sprites.add(Door(320,448))
+                currentRoom.door_sprites.add(Door((320,448)))
             elif exit[1]<currentCord[1]:#exit is NORTH
                 direction=NORTH
-                currentRoom.door_sprites.add(Door(320,0))
+                currentRoom.door_sprites.add(Door((320,0)))
             #add this to the doors list
             currentRoom.doors.append(direction)
             #check to see if a room exists, if not add it
