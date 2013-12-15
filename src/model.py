@@ -8,6 +8,8 @@ MnM_RANGED = 1
 WEEPINGANGELS = 2
 SILENCE = 3
 
+boss_types = [2]
+
 MONSTER_IMAGES = ['mnm.png', 'green_mnm.png']
 
 EAST = "east"
@@ -122,6 +124,7 @@ class Monster(pygame.sprite.Sprite):
         self.hitcount = 0
         self.pushcount = 0
         self.cannot_collide = pygame.sprite.Group()
+        self.type = type
         if type == MnM:
             self.health = 20
             self.strength = 2
@@ -166,6 +169,12 @@ class Monster(pygame.sprite.Sprite):
     
     def update(self, obstacles, moveables, character):
         self.behavior(self, obstacles, moveables, character)
+        if (self.rect.bottom < 32 or self.rect.top > 448 or
+            self.rect.right < 64 or self.rect.bottom > self.rect.left > 608):
+            if not self.type in boss_types:
+                self.kill()
+            else:
+                self.rect.center = self.area.center
     
 
 class Projectile(pygame.sprite.Sprite):
@@ -297,6 +306,15 @@ class Door(pygame.sprite.Sprite):
             elif self.rect.top == 224 and self.rect.left == 608:
                 character.rect.x = 64
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['east'])
+        for monster in pygame.sprite.spritecollide(self, character.currentroom.monsters, 0):
+            if self.rect.left == 320 and self.rect.top == 0:
+                monster.rect.top = self.rect.bottom
+            elif self.rect.left == 320 and self.rect.top == 448:
+                monster.rect.bottom = self.rect.top
+            elif self.rect.top == 224 and self.rect.left == 32:
+                monster.rect.left = self.rect.right
+            elif self.rect.top == 224 and self.rect.left == 608:
+                monster.rect.right = self.rect.left
 '''
 doors are passed as an array of "east", "north", "south", and "west"
 
@@ -406,6 +424,7 @@ class Room:
     def add_monsters(self, charactersprites, level):
                 
         for i in range(random.randint(3,5)):
+            level.num_monsters += 1
             x = random.randint(0,1)
             if x == 0:
                 temp_monster = Monster(0, behaviors.blue_mnm)
@@ -416,7 +435,6 @@ class Room:
                or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
                     temp_monster.rect.topleft = (random.randint(0,temp_monster.area.right), random.randint(0,temp_monster.area.bottom))
             self.monsters.add(temp_monster)
-        level.num_monsters += i
         self.moveables.add(self.monsters)
         
     def __str__(self):
