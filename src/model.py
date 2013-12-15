@@ -473,6 +473,7 @@ class Level:
             self.bossRoom=self.findLongestPath(self.rootRoom)
             self.printGrid()
             self.generateObstacles()
+            self.num_monsters = 0
     def generateWalls(self):
         for i in range(self.SIZE):
             for j in range(self.SIZE):
