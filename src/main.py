@@ -6,6 +6,7 @@ Created on Dec 13, 2013
 import pygame
 from pygame.locals import *
 import model
+import gui
 
 def main():
     pygame.init()
@@ -21,6 +22,7 @@ def main():
     l=model.Level()    
     character = model.Character()
     
+    healthbar = gui.HealthBar()
     
     clock = pygame.time.Clock()
     
