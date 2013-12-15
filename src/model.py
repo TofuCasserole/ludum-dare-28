@@ -29,9 +29,9 @@ def load_png(name):
     try:
         image = pygame.image.load(fullname)
         if image.get_alpha() is None:
-            image = pygame.transform.scale(image.convert(), (30, 30))
+            image = pygame.transform.scale(image.convert(), (32, 32))
         else:
-            image = pygame.transform.scale(image.convert_alpha(), (30, 30))
+            image = pygame.transform.scale(image.convert_alpha(), (32, 32))
     except pygame.error, message:
             print 'Cannot load image:', fullname
             raise SystemExit, message
@@ -41,6 +41,9 @@ class Character(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('char.png')
+        self.image = pygame.transform.scale(self.image, (26, 26))
+        self.rect.w = 26
+        self.rect.h = 26
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         self.health = 100
@@ -353,14 +356,23 @@ class Room:
         for x in range(32, 640, 32):
             if not (x == 320 and NORTH in self.doors):
                 self.walls.add(Obstacle((x, 0), "wall.png"))
+            else:
+                self.door_sprites.add(Door((320,0)))
             if not (x == 320 and SOUTH in self.doors):
                 self.walls.add(Obstacle((x, 448), "wall.png"))
+            else:
+                self.door_sprites.add(Door((320,448)))
         # generate east/west walls
         for y in range(0, 480, 32):
             if not (y == 224 and WEST in self.doors):
                 self.walls.add(Obstacle((32, y), "wall.png"))
+            else:
+                self.door_sprites.add(Door((32,224)))
             if not (y == 224 and EAST in self.doors):
                 self.walls.add(Obstacle((608, y), "wall.png"))
+            else:
+                self.door_sprites.add(Door((320,224)))
+
     def monster_locations(self):
         return [monster.location for monster in self.monsters]
     
@@ -439,16 +451,12 @@ class Level:
             #we need to figure out what direction this door is at
             if exit[0]>currentCord[0]:#exit is EAST
                 direction=EAST
-                currentRoom.door_sprites.add(Door((608,224)))
             elif exit[0]<currentCord[0]:#exit is WEST
                 direction=WEST
-                currentRoom.door_sprites.add(Door((32,224)))
             elif exit[1]>currentCord[1]:#exit is SOUTH
                 direction=SOUTH
-                currentRoom.door_sprites.add(Door((320,448)))
             elif exit[1]<currentCord[1]:#exit is NORTH
                 direction=NORTH
-                currentRoom.door_sprites.add(Door((320,0)))
             #add this to the doors list
             currentRoom.doors.append(direction)
             #check to see if a room exists, if not add it

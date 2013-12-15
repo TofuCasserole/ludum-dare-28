@@ -60,7 +60,7 @@ def main():
                         if event2.type == KEYDOWN and event2.key == K_d:
                             cont = True
                     if cont: continue
-                    character.movepos[0] = -8
+                    character.movepos[0] = -6
                     character.tryingmoveleft = True
                     character.last_direction_moved = "left"
                 elif event.key == K_w:
@@ -69,7 +69,7 @@ def main():
                         if event2.type == KEYDOWN and event2.key == K_s:
                             cont = True
                     if cont: continue
-                    character.movepos[1] = -8
+                    character.movepos[1] = -6
                     character.tryingmoveup = True
                     character.last_direction_moved = "up"
                 elif event.key == K_s:
@@ -78,7 +78,7 @@ def main():
                         if event2.type == KEYDOWN and event2.key == K_w:
                             cont = True
                     if cont: continue
-                    character.movepos[1] = 8
+                    character.movepos[1] = 6
                     character.tryingmovedown = True
                     character.last_direction_moved = "down"
                 elif event.key == K_d:
@@ -87,7 +87,7 @@ def main():
                         if event2.type == KEYDOWN and event2.key == K_a:
                             cont = True
                     if cont: continue
-                    character.movepos[0] = 8
+                    character.movepos[0] = 6
                     character.tryingmoveright = True
                     character.last_direction_moved = "right"
             elif event.type == KEYUP:
@@ -98,28 +98,28 @@ def main():
                     if character.tryingmoveright == False:
                         character.movepos[0] = 0
                     else:
-                        character.movepos[0] = 8
+                        character.movepos[0] = 6
                     character.tryingmoveleft = False
                 elif event.key == K_w:
                     #if character.movepos[1] < 0:
                     if character.tryingmovedown == False:
                         character.movepos[1] = 0
                     else:
-                        character.movepos[1] = 8
+                        character.movepos[1] = 6
                     character.tryingmoveup = False
                 elif event.key == K_s:
                     #if character.movepos[1] > 0:
                     if character.tryingmoveup == False:
                         character.movepos[1] = 0
                     else:
-                        character.movepos[1] = -8
+                        character.movepos[1] = -6
                     character.tryingmovedown = False
                 elif event.key == K_d:
                     #if character.movepos[0] > 0:
                     if character.tryingmoveleft == False:
                         character.movepos[0] = 0
                     else:
-                        character.movepos[0] = -8
+                        character.movepos[0] = -6
                     character.tryingmoveright = False
         screen.blit(background, (0,0))
         currentroom.walls.draw(screen)
