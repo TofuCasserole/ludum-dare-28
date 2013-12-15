@@ -12,12 +12,12 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
     
-    dirt = model.load_png("dirt.png")
+    dirt = pygame.transform.scale2x(model.load_png("dirt.png")[0])
     background = pygame.Surface(screen.get_size())
     background = background.convert()
     for x in range(32,640,32):
         for y in range(0,480,32):
-            background.blit(dirt[0], (x,y))
+            background.blit(dirt, (x,y))
     
     l=model.Level()    
     character = model.Character()

@@ -27,9 +27,9 @@ def load_png(name):
     try:
         image = pygame.image.load(fullname)
         if image.get_alpha() is None:
-            image = pygame.transform.scale(image.convert(), (32, 32))
+            image = image.convert()
         else:
-            image = pygame.transform.scale(image.convert_alpha(), (32, 32))
+            image = image.convert_alpha()
     except pygame.error, message:
             print 'Cannot load image:', fullname
             raise SystemExit, message
@@ -93,6 +93,7 @@ class Monster(pygame.sprite.Sprite):
     def __init__(self, character, obstacles, monsters):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('slime.png')
+        self.image = pygame.transform.scale2x(self.image)
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         random.seed()
@@ -162,6 +163,7 @@ class Sword(pygame.sprite.Sprite):
     def __init__(self, character):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('sword.png')
+        self.image = pygame.transform.scale2x(self.image)
         self.rotate = 90
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
@@ -220,6 +222,7 @@ class Obstacle(pygame.sprite.Sprite):
     def __init__(self, location, sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png(sprite)
+        self.image = pygame.transform.scale2x(self.image)
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
     
@@ -229,6 +232,7 @@ class Door(pygame.sprite.Sprite):
     def __init__(self, location):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = load_png('rock.png')
+        self.image = pygame.transform.scale2x(self.image)
         self.rect.topleft = location
         
     def update(self, character):
