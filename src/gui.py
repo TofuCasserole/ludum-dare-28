@@ -11,7 +11,7 @@ from spritesheet import SpriteSheet
 class HealthBar():
     
     def __init__(self):
-        self.sheet = SpriteSheet(model.load_png("gui.png")[0], (132, 32))
+        self.sheet = SpriteSheet(pygame.transform.scale2x(model.load_png("gui.png")))
         self.value = 100
     
     def draw(self, surface):

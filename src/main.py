@@ -12,7 +12,7 @@ def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
     
-    dirt = pygame.transform.scale2x(model.load_png("dirt.png")[0])
+    dirt = pygame.transform.scale2x(model.load_png("dirt.png"))
     background = pygame.Surface(screen.get_size())
     background = background.convert()
     for x in range(32,640,32):

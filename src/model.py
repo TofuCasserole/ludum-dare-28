@@ -33,15 +33,14 @@ def load_png(name):
     except pygame.error, message:
             print 'Cannot load image:', fullname
             raise SystemExit, message
-    return image, image.get_rect()
+    return image
 
 class Character(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('char.png')
+        self.image = load_png('char.png')
         self.image = pygame.transform.scale(self.image, (26, 26))
-        self.rect.w = 26
-        self.rect.h = 26
+        self.rect = self.image.get_rect()
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         self.health = 100
@@ -92,8 +91,9 @@ class Character(pygame.sprite.Sprite):
 class Monster(pygame.sprite.Sprite):
     def __init__(self, character, obstacles, monsters):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('slime.png')
+        self.image = load_png('slime.png')
         self.image = pygame.transform.scale2x(self.image)
+        self.rect = self.image.get_rect()
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         random.seed()
@@ -162,8 +162,9 @@ class Monster(pygame.sprite.Sprite):
 class Sword(pygame.sprite.Sprite):
     def __init__(self, character):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('sword.png')
+        self.image = load_png('sword.png')
         self.image = pygame.transform.scale2x(self.image)
+        self.rect = self.image.get_rect()
         self.rotate = 90
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
@@ -221,8 +222,9 @@ class Sword(pygame.sprite.Sprite):
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, location, sprite):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png(sprite)
+        self.image = load_png(sprite)
         self.image = pygame.transform.scale2x(self.image)
+        self.rect = self.image.get_rect()
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
     
@@ -231,8 +233,9 @@ class Obstacle(pygame.sprite.Sprite):
 class Door(pygame.sprite.Sprite):
     def __init__(self, location):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('door.png')
+        self.image = load_png('door.png')
         self.image = pygame.transform.scale2x(self.image)
+        self.rect = self.image.get_rect()
         self.rect.topleft = location
         
     def update(self, character):
