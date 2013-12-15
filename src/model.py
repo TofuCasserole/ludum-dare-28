@@ -20,6 +20,7 @@ import os
 import random
 import pygame
 import main
+import behaviors
 from pygame.locals import *
 
 #WOOOOOOO!!!!
@@ -136,36 +137,7 @@ class Monster(pygame.sprite.Sprite):
             
         
     def update(self, obstacles, moveables, character):
-        if self.state == "hit":
-            if self.hitcount < 15:
-                self.hitcount += 1
-            else:
-                self.hitcount = 0
-                self.state = "chase"
-                
-        if self.state == "pushback":
-            if self.pushcount < 2:
-                self.pushcount += 1
-            else:
-                self.pushcount = 0
-                self.state = "chase"
-        
-        if self.state == "chase":
-            if self.rect.top > character.rect.top:
-                self.movepos[1] = -3
-            elif self.rect.bottom < character.rect.bottom:
-                self.movepos[1] = 3
-            else:
-                self.movepos[1] = 0
-            if self.rect.left > character.rect.left:
-                self.movepos[0] = -3
-            elif self.rect.right < character.rect.right:
-                self.movepos[0] = 3
-            else:
-                self.movepos[0] = 0
-                
-        move(self, moveables, obstacles, self.movepos)
-        pygame.event.pump()
+        behaviors.blue_mnm(self, obstacles, moveables, character)
 
 class Sword(pygame.sprite.Sprite):
     def __init__(self, character):
@@ -356,11 +328,7 @@ def move(sprite, moveables, obstacles, movepos, realign = False):
                 if moveable2 == sprite:
                     continue
                 move(moveable2, moveables, obstacles, moveable2.getmovepos(), True)
-    
-        
-    
-        
-        
+
 
 class Room:
     def __init__(self, cord,doors=[], obstacles=None, monsters=None):
