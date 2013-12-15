@@ -416,7 +416,13 @@ class Level:
         self.numberOfRooms=random.randint(6,6)
         self.rootRoom=(self.SIZE/2,self.SIZE/2)
         self.generateLevel()
-    
+        self.generateWalls()
+        self.printGrid()
+    def generateWalls(self):
+        for i in range(self.SIZE):
+            for j in range(self.SIZE):
+                if isinstance(self.levelGrid[i][j],Room):
+                    self.levelGrid[i][j].generateWalls()
     def getLocation(self, gridCords):
         return self.levelGrid[gridCords[0]][gridCords[1]]
 
@@ -492,6 +498,8 @@ class Level:
             for j in range(self.SIZE):
                 if self.levelGrid[i][j]==-1:
                     line+='.'
+                elif (i,j)==self.rootRoom:
+                    line+='!'
                 else:
                     line+='*'
             print line
