@@ -122,6 +122,7 @@ def main():
                         character.movepos[0] = -6
                     character.tryingmoveright = False
         screen.blit(background, (0,0))
+        healthbar.health = character.health
         healthbar.draw(screen)
         currentroom.walls.draw(screen)
         for monster in currentroom.monsters.sprites():
