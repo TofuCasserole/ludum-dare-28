@@ -416,7 +416,8 @@ class Level:
         self.rootRoom=(self.SIZE/2,self.SIZE/2)
         self.generateLevel()
         self.generateWalls()
-        self.printGrid()
+        self.bossRoom=self.findLongestPath(self.rootRoom)
+        self.printGrid() 
     def generateWalls(self):
         for i in range(self.SIZE):
             for j in range(self.SIZE):
@@ -501,15 +502,41 @@ class Level:
                         continue
         print(newRooms)
         return newRooms
-                
+    def findLongestPath(self, startingPos):
+        #we need to populate the queue and get going!
+        queue=[]
+        queue.append([startingPos, 0])
+        longest=self.__longestPath(queue,[],[])  
+        return longest[0]
+    def __longestPath(self, queue, visited, longest):
+        if len(queue)==0:
+            return longest
+        #pop the first element
+        currentPos=queue.pop(0)
+        if currentPos[0] in visited:
+            #lets dump this one and move on
+            return self.__longestPath(queue, visited, longest)
+        #check the current node to see if it is the longest
+        if len(longest)==0:
+            longest=currentPos
+        elif currentPos[1]>longest[1]:
+            longest=currentPos    
+        #time to get all of the children of this node and add them to the queue
+        room=self.getLocation(currentPos[0])
+        for door in room.connectingRooms:
+            queue.append([room.connectingRooms[door], currentPos[1]+1])
+        visited.append(currentPos[0])
+        return self.__longestPath(queue, visited, longest)
     def printGrid(self):
         for i in range(self.SIZE):
             line=''
             for j in range(self.SIZE):
-                if self.levelGrid[i][j]==-1:
+                if self.levelGrid[j][i]==-1:
                     line+='.'
-                elif (i,j)==self.rootRoom:
+                elif (j,i)==self.rootRoom:
                     line+='!'
+                elif (j,i)==self.bossRoom:
+                    line+='B'
                 else:
                     line+='*'
             print line
