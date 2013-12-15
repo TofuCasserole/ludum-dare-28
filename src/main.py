@@ -129,7 +129,7 @@ def main():
         character.currentroom.walls.draw(screen)
         #for monster in currentroom.monsters.sprites():
         #    screen.blit(monster.image, monster.rect)
-        charactersprites.update(obstacles, moveables)
+        charactersprites.update(character.currentroom.walls, moveables)
         sword.update(character, monsters)
         charactersprites.draw(screen)
         #monsters.update(obstacles, moveables, character)
