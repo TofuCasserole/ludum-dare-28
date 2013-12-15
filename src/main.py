@@ -8,7 +8,6 @@ from pygame.locals import *
 import model
 import gui
 
-
 def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
@@ -31,16 +30,16 @@ def main():
     
     obstacles = pygame.sprite.RenderPlain()
     obstacles.add(model.Obstacle((128,128), "rock.png"), model.Obstacle((128, 192), "rock.png"), model.Obstacle((192,192), "rock.png"))
-    
-    monsters = pygame.sprite.RenderUpdates()
-    monsters.add(model.Monster(charactersprites, obstacles, monsters, model.MnM), model.Monster(charactersprites, obstacles, monsters, model.MnM))
-    
+        
     sword = pygame.sprite.RenderUpdates()
 
     moveables = pygame.sprite.RenderUpdates()
-    moveables.add(monsters.sprites(), character)
+    moveables.add(character)
     
     character.currentroom = l.getLocation(l.rootRoom)
+    
+    for room in l.getAllRooms():
+        room.add_monsters(charactersprites)
     
     obstacles.add(character.currentroom.walls)
     
@@ -50,12 +49,10 @@ def main():
         for event in event_list:
             if event.type == QUIT:
                 return
-            elif event.type == MOUSEBUTTONDOWN:
-                if sword.sprites() == [] and character.sword_cooldown > 25:
-                    sword.add(model.Sword(character))
             elif event.type == KEYDOWN:
-                if True == False:
-                    pass
+                if event.key == K_SPACE or event.key == K_RETURN:
+                    if sword.sprites() == [] and character.sword_cooldown > 10:
+                        sword.add(model.Sword(character))
                 elif event.key == K_a:
                     cont = False
                     for event2 in event_list:
@@ -127,13 +124,13 @@ def main():
         healthbar.health = character.health
         healthbar.draw(screen)
         character.currentroom.walls.draw(screen)
+        character.currentroom.monsters.draw(screen)
         #for monster in currentroom.monsters.sprites():
         #    screen.blit(monster.image, monster.rect)
-        charactersprites.update(character.currentroom.walls, moveables)
-        sword.update(character, monsters)
+        charactersprites.update(character.currentroom.walls, character.currentroom.moveables, sword)
+        sword.update(character, character.currentroom.monsters)
         charactersprites.draw(screen)
-        #monsters.update(obstacles, moveables, character)
-        #monsters.draw(screen)
+        character.currentroom.monsters.update(character.currentroom.walls, character.currentroom.moveables, character)
         #obstacles.draw(screen)
         character.currentroom.door_sprites.update(character, l)
         sword.draw(screen)
