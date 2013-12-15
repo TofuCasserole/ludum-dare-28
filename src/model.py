@@ -337,10 +337,6 @@ class Room:
         self.walls = pygame.sprite.RenderUpdates()
         self.door_sprites = pygame.sprite.RenderUpdates()
         self.cord=cord
-    def __str__(self):
-        return str(self.cord)+':'+str(self.connectingRooms)
-    def __repr__(self):
-        return self.__str__()
     def generateWalls(self):
         print(self.doors)
         if self.obstacles!=None and self.monsters!=None:
@@ -375,27 +371,62 @@ class Level:
         self.directions={0:'NORTH',1:'SOUTH',2:'EAST',3:'WEST'}
         #self.cords={}#cord:[exit cords]
         #figure out how many rooms we are going to generate
-        self.numberOfRooms=random.randint(10,15)
+        self.numberOfRooms=random.randint(2,2)
         #generate the cords of the rooms
+        self.roomCords=[]
         print 'generating cords'
         cords=self.__generateCords()
         while cords==None:
             print 'generating cords'
             cords=self.__generateCords()
         #print len(cords)
-        #print cords
+        print cords
+        self.printDebugMatrix(cords)
         #convert the cords to rooms and make them a self contained graph
         self.rootRoom=''
-        self.rooms=[]#this is a temp var that will be used to generate the walls
         self.__generateRooms(cords)
         for room in self.rooms:
-            room.generateWalls()
+            self.rooms[room].generateWalls()
     def __generateCords(self,cords={},queue=[]):
+        cords={}
+        queue=[]
+        cords[(0,0)]=[]
+        exits=self.__generateExits((0,0))
+        for exit in exits:
+            queue.append([exit, (0,0)])#child, parent
+        cords[(0,0)]=exits
+        while len(queue)!=0:
+            current=queue.pop(0)
+            child=current[0]
+            parent=current[1]
+            #add the parent exit to the child exit
+            if child not in cords:
+                cords[child]=[]
+            cords[child].append(parent)
+
+            exits=self.__generateExits(child)
+            for exit in exits:
+                if exit not in cords:
+                    #new room
+                    cords[exit]=[]
+                    queue.append([exit, child])
+                if exit not in cords[child]:
+                    cords[child].append(exit)
+            if len(cords)>=self.numberOfRooms:
+                break
+        self.roomCords=[]
+        for cord in cords:
+            self.roomCords.append(cord)   
+        return cords     
+
+
+        '''
         if len(cords)>=self.numberOfRooms:
             return cords
         if len(cords)==0:
             cords[(0,0)]=[]#generate the init cord with no exits
             currentCord=(0,0)
+            self.roomCords.append(currentCord)
         else:
             if len(queue)>0:
                 currentCord=queue.pop(0)
@@ -410,11 +441,13 @@ class Level:
                 cords[exit]=[currentCord]#room doesnt exist so lets add it and add the currentCord as an exit
                 #since this is a new room lets add it to the queue!
                 queue.append(exit)
+                self.roomCords.append(exit)
             else:#since the cord already exits lets add the currentCord as an exit    
                 cords[exit].append(currentCord) 
             cords[currentCord].append(exit)#append the exit the the current cord
         #time to call this function again!
         return self.__generateCords(cords, queue)
+    '''
     def __generateExits(self, currentCord):
         exits=[]
         directions=[-1,1,1,-1]
@@ -426,55 +459,55 @@ class Level:
                 else: #east or west, X cord
                     exits.append((currentCord[0]+directions[i],currentCord[1]))
         return exits
-    def __generateRooms(self,cords, currentCord=(0,0), currentRoom=None, rooms={}, visited=[]):
-        #we need to traverse the cords to generate the rooms
-        #start by creating the root room
-        if currentCord==(0,0):
-            self.rootRoom=Room(currentCord)
-            currentRoom=self.rootRoom
-            rooms[(0,0)]=self.rootRoom
-        #time to iterate through all of the exits, create the rooms if needed, and connect them
-        for exit in cords[currentCord]:
-            direction=''
-            #we need to figure out what direction this door is at
-            if exit[0]>currentCord[0]:#exit is EAST
-                direction=EAST
-                currentRoom.door_sprites.add(Door((608,224)))
-            elif exit[0]<currentCord[0]:#exit is WEST
-                direction=WEST
-                currentRoom.door_sprites.add(Door((32,224)))
-            elif exit[1]>currentCord[1]:#exit is SOUTH
-                direction=SOUTH
-                currentRoom.door_sprites.add(Door((320,448)))
-            elif exit[1]<currentCord[1]:#exit is NORTH
-                direction=NORTH
-                currentRoom.door_sprites.add(Door((320,0)))
-            #add this to the doors list
-            currentRoom.doors.append(direction)
-            #check to see if a room exists, if not add it
-            if exit not in rooms:
-                rooms[exit]=Room(exit)
-            currentRoom.connectingRooms[direction]=rooms[exit]
-        #now that we have created some rooms lets go through each of the exits again and recurvsively create the rooms
-        visited.append(currentCord)
-        for exit in cords[currentCord]:
-            if exit not in visited:
-                self.__generateRooms(cords, exit, rooms[exit], rooms, visited)
-        if currentCord==(0,0):
-            for key in rooms:
-                self.rooms.append(rooms[key])
-            print self.rooms
+    def __generateRooms(self,cords):
+        #create all the rooms first..
+        self.rooms={}
+        print self.roomCords
+        for cord in self.roomCords:
+            self.rooms[cord]=Room(cord)
+        print [self.rooms]
+        #now go back through the list and add the exits..
+        for roomCord in self.rooms:
+            for exit in cords[roomCord]:
+                direction=''
+                #we need to figure out what direction this door is at
+                if exit[0]>roomCord[0]:#exit is EAST
+                    direction=EAST
+                    self.rooms[roomCord].door_sprites.add(Door((608,224)))
+                elif exit[0]<roomCord[0]:#exit is WEST
+                    direction=WEST
+                    self.rooms[roomCord].door_sprites.add(Door((32,224)))
+                elif exit[1]>roomCord[1]:#exit is SOUTH
+                    direction=SOUTH
+                    self.rooms[roomCord].door_sprites.add(Door((320,448)))
+                elif exit[1]<roomCord[1]:#exit is NORTH
+                    direction=NORTH
+                    self.rooms[roomCord].door_sprites.add(Door((320,0)))
+                print roomCord, exit, direction
+                if direction not in self.rooms[roomCord].doors:
+                    self.rooms[roomCord].doors.append(direction)
+                
+                self.rooms[roomCord].connectingRooms[direction]=self.rooms[exit]
+        
+        self.rootRoom=self.rooms[(0,0)]
+       
     def __initWalls(self):
         for room in self.rooms:
             room.generateWalls()
-    def __toString(self, room):
-        s=''
-        s+=room+':['
-        for key in room.connectingRooms:
-            pass
-    def __str__(self):
-        
-        return self.rootRoom.__str__()
-    def __repr__(self):
-        self.__str__()
+    def printDebugMatrix(self,cords):
+        v=20
+        m=[['-']*v for x in range(v)]
+        center=(v/2,v/2)
+        m[center[0]][center[1]]='!'
+        for cord in self.roomCords:
+            m[center[0]+cord[0]][center[1]+cord[1]]='*'
+        for i in range(v):
+            line=''
+            for j in range(v):
+                if center==(i,j):
+                    line+='!'
+                else:
+                    line+= m[i][j]
+            print line
+            line=''
 
