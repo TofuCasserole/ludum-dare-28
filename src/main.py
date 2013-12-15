@@ -17,7 +17,8 @@ def main():
     for x in range(32,640,32):
         for y in range(0,480,32):
             background.blit(dirt[0], (x,y))
-        
+    
+    l=model.Level()    
     character = model.Character()
     
     
@@ -36,7 +37,7 @@ def main():
     moveables = pygame.sprite.RenderUpdates()
     moveables.add(monsters.sprites(), character)
     
-    currentroom = model.Room(model.NORTH, obstacles, monsters)
+    currentroom = l.rootRoom
     obstacles.add(currentroom.walls)
     
     while True:
@@ -122,10 +123,10 @@ def main():
         currentroom.walls.draw(screen)
         for monster in currentroom.monsters.sprites():
             screen.blit(monster.image, monster.rect)
-        charactersprites.update(currentroom.obstacles, moveables)
+        charactersprites.update(obstacles, moveables)
         sword.update(character, monsters)
         charactersprites.draw(screen)
-        monsters.update(currentroom.obstacles, moveables, character)
+        monsters.update(obstacles, moveables, character)
         monsters.draw(screen)
         obstacles.draw(screen)
         sword.draw(screen)

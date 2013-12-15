@@ -56,6 +56,8 @@ class Character(pygame.sprite.Sprite):
         self.invuln_count = 0
         self.hitmove = [0,0]
         self.sword_cooldown = 30
+        self.rect.midleft = self.area.midleft
+        self.rect = self.rect.move([74,0])
     
     def getmovepos(self):
         if self.state == "hit":
@@ -332,15 +334,17 @@ class Room:
     def __init__(self, cord,doors=[], obstacles=None, monsters=None):
         self.doors = doors
         self.connectingRooms={}#door:room -> NORTH:<roomObject>
-        self.obstacles = obstacles
-        self.monsters = monsters
+        self.obstacles = pygame.sprite.RenderUpdates()
+        self.monsters = pygame.sprite.RenderUpdates()
+        self.walls = pygame.sprite.RenderUpdates()
         self.cord=cord
     def __str__(self):
         return str(self.cord)+':'+str(self.connectingRooms)
     def __repr__(self):
         return self.__str__()
     def generateWalls(self):
-	if self.obstacles!=None and self.monsters!=None:
+        print(self.doors)
+        if self.obstacles!=None and self.monsters!=None:
             possible_locations = [(x,y) for x in range(0, WIDTH) for y in range (0, LENGTH) if (x,y) not in self.obstacles]
             random.shuffle(possible_locations)
             for monster in self.monsters:
@@ -348,15 +352,15 @@ class Room:
         self.walls = pygame.sprite.RenderPlain()
         # generate north/south walls
         for x in range(32, 640, 32):
-            if not (x == 320 and NORTH in doors):
+            if not (x == 320 and NORTH in self.doors):
                 self.walls.add(Obstacle((x, 0), "wall.png"))
-            if not (x == 320 and SOUTH in doors):
+            if not (x == 320 and SOUTH in self.doors):
                 self.walls.add(Obstacle((x, 448), "wall.png"))
         # generate east/west walls
         for y in range(0, 480, 32):
-            if not (y == 224 and WEST in doors):
+            if not (y == 224 and WEST in self.doors):
                 self.walls.add(Obstacle((32, y), "wall.png"))
-            if not (y == 224 and EAST in doors):
+            if not (y == 224 and EAST in self.doors):
                 self.walls.add(Obstacle((608, y), "wall.png"))
     def monster_locations(self):
         return [monster.location for monster in self.monsters]
@@ -385,6 +389,8 @@ class Level:
         self.rootRoom=''
         self.rooms=[]#this is a temp var that will be used to generate the walls
         self.__generateRooms(cords)
+        for room in self.rooms:
+            room.generateWalls()
     def __generateCords(self,cords={},queue=[]):
         if len(cords)>=self.numberOfRooms:
             return cords
@@ -451,7 +457,10 @@ class Level:
         for exit in cords[currentCord]:
             if exit not in visited:
                 self.__generateRooms(cords, exit, rooms[exit], rooms, visited)
-        self.rooms=rooms
+        if currentCord==(0,0):
+            for key in rooms:
+                self.rooms.append(rooms[key])
+            print self.rooms
     def __initWalls(self):
         for room in self.rooms:
             room.generateWalls()
@@ -465,6 +474,4 @@ class Level:
         return self.rootRoom.__str__()
     def __repr__(self):
         self.__str__()
-l=Level()
-print l
 
