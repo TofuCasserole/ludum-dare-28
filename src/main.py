@@ -40,6 +40,7 @@ def main():
     moveables.add(monsters.sprites(), character)
     
     currentroom = l.rootRoom
+    print [currentroom, 'asdfadsf']
     obstacles.add(currentroom.walls)
     
     while True:
