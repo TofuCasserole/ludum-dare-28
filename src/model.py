@@ -461,17 +461,18 @@ cur_room_col = 0
 
 
 class Level:
-    def __init__(self):
-        self.SIZE=10
-        self.levelGrid=[[-1]*self.SIZE for x in range(self.SIZE)]
+    def __init__(self, debug=False):
+        if not debug:
+            self.SIZE=10
+            self.levelGrid=[[-1]*self.SIZE for x in range(self.SIZE)]
         
-        self.numberOfRooms=random.randint(10,15)
-        self.rootRoom=(self.SIZE/2,self.SIZE/2)
-        self.generateLevel()
-        self.generateWalls()
-        self.printGrid()
-        self.num_monsters = 0
-        
+            self.numberOfRooms=random.randint(10,15)
+            self.rootRoom=(self.SIZE/2,self.SIZE/2)
+            self.generateLevel()
+            self.generateWalls()
+            self.bossRoom=self.findLongestPath(self.rootRoom)
+            self.printGrid()
+            self.generateObstacles()
     def generateWalls(self):
         for i in range(self.SIZE):
             for j in range(self.SIZE):
@@ -556,16 +557,96 @@ class Level:
                         continue
         print(newRooms)
         return newRooms
-                
+    def findLongestPath(self, startingPos):
+        #we need to populate the queue and get going!
+        queue=[]
+        queue.append([startingPos, 0])
+        longest=self.__longestPath(queue,[],[])  
+        return longest[0]
+    def __longestPath(self, queue, visited, longest):
+        if len(queue)==0:
+            return longest
+        #pop the first element
+        currentPos=queue.pop(0)
+        if currentPos[0] in visited:
+            #lets dump this one and move on
+            return self.__longestPath(queue, visited, longest)
+        #check the current node to see if it is the longest
+        if len(longest)==0:
+            longest=currentPos
+        elif currentPos[1]>longest[1]:
+            longest=currentPos    
+        #time to get all of the children of this node and add them to the queue
+        room=self.getLocation(currentPos[0])
+        for door in room.connectingRooms:
+            queue.append([room.connectingRooms[door], currentPos[1]+1])
+        visited.append(currentPos[0])
+        return self.__longestPath(queue, visited, longest)
+    def generateObstacles(self):
+        for i in range(self.SIZE):
+            for j in range(self.SIZE):
+                if isinstance(self.levelGrid[i][j],Room):
+                    if (i,j)==self.bossRoom:
+                        continue
+                    self.__generateObstacles(self.levelGrid[i][j])
+    def __generateObstacles(self, room, debug=False):
+        locationList=[(2,2),(2,3),(2,4),(2,7),(2,11),(2,13),(2,14),(2,15),(2,16),
+                      (3,2),(3,8),(3,10),(3,13),(3,14),(3,15),(3,15),(3,16),
+                      (4,2),(4,5),(4,6),(4,8),(4,10),
+                      (5,5),(5,6),(5,13),(5,14),(5,15),(5,16),
+                      (6,3),(6,8),(6,9),(6,10),(6,13),(6,16),
+                      (7,4),
+                      (8,2),(8,6),(8,7),(8,10),(8,11),(8,15),(8,16),
+                      (9,3),(9,8),(9,10),(9,14),(9,15),
+                      (10,3),(10,4),(10,13),(10,14),
+                      (11,4),(11,5),(11,13),(11,16),
+                      (12,6)]
+        if debug:
+            #need 19 across and 15 down
+            roomGrid=[['*']*19 for x in range(15)]
+            for i in range(19):
+                roomGrid[0][i]='~'
+                roomGrid[14][i]='~'
+            for i in range(15):
+                roomGrid[i][0]='~'
+                roomGrid[i][18]='~'
+            #for i in range(len(locationList)):
+            #    roomGrid[locationList[i][0]][locationList[i][1]]='X'
+            #self.printRoom(roomGrid)
+        #go through the list and determine if we are placing an object
+        for i in range(len(locationList)):
+            if bool(random.randint(0,1)):
+                #place the object!
+                if debug:
+                    roomGrid[locationList[i][0]][locationList[i][1]]='X'
+                x=32+(locationList[i][1]*32)
+                y=(locationList[i][0]*32)
+                obj=Obstacle((x,y),'rock.png')
+                room.walls.add(obj)
+                room.obstacles.add(obj)
+        if debug:
+            self.printRoom(roomGrid)
+
+
+        
+    def printRoom(self, roomGrid):
+        for i in range(15):
+            line=''
+            for j in range(19):
+                line+=roomGrid[i][j]
+            print line
+        print
+        print
     def printGrid(self):
         for i in range(self.SIZE):
             line=''
             for j in range(self.SIZE):
-                if self.levelGrid[i][j]==-1:
+                if self.levelGrid[j][i]==-1:
                     line+='.'
-                elif (i,j)==self.rootRoom:
+                elif (j,i)==self.rootRoom:
                     line+='!'
+                elif (j,i)==self.bossRoom:
+                    line+='B'
                 else:
                     line+='*'
             print line
-
