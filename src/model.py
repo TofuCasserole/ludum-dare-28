@@ -8,6 +8,8 @@ MnM_RANGED = 1
 WEEPINGANGELS = 2
 SILENCE = 3
 
+MONSTER_IMAGES = ['mnm.png', 'green_mnm.png']
+
 EAST = "east"
 WEST = "west"
 NORTH = "north"
@@ -62,7 +64,7 @@ class Character(pygame.sprite.Sprite):
         self.sword_cooldown = 30
         self.rect.midleft = self.area.midleft
         self.rect = self.rect.move([74,0])
-        self.can_collide = pygame.sprite.Group()
+        self.cannot_collide = pygame.sprite.Group()
     
     def getmovepos(self):
         if self.state == "hit":
@@ -83,7 +85,7 @@ class Character(pygame.sprite.Sprite):
                 self.state = "invulnerable"
                 self.hitcount = 0
                 for current_collisions in pygame.sprite.spritecollide(self, moveables,0):
-                    self.can_collide.add(current_collisions)
+                    self.cannot_collide.add(current_collisions)
             move(self, [], obstacles, self.getmovepos())
             pygame.event.pump()
             return
@@ -97,9 +99,9 @@ class Character(pygame.sprite.Sprite):
         
         if sword.sprites() == []:
             move(self, moveables, obstacles, self.getmovepos())
-        for current_collision in self.can_collide.sprites():
+        for current_collision in self.cannot_collide.sprites():
             if not current_collision in pygame.sprite.spritecollide(self, moveables, 0):
-                self.can_collide.remove(current_collision)
+                self.cannot_collide.remove(current_collision)
         if self.rect.right < 32 or self.rect.left > 608 or self.rect.bottom < 32 or self.rect.top > 448:
             self.rect.center = self.area.center
         pygame.event.pump()
@@ -109,7 +111,7 @@ class Monster(pygame.sprite.Sprite):
     def __init__(self, type, behavior):
         self.behavior = behavior
         pygame.sprite.Sprite.__init__(self)
-        self.image = load_png('mnm.png')
+        self.image = load_png(MONSTER_IMAGES[type])
         self.image = pygame.transform.scale2x(self.image)
         self.rect = self.image.get_rect()
         screen = pygame.display.get_surface()
@@ -119,10 +121,27 @@ class Monster(pygame.sprite.Sprite):
         self.movepos = [0,0]
         self.hitcount = 0
         self.pushcount = 0
-        self.can_collide = pygame.sprite.Group()
+        self.cannot_collide = pygame.sprite.Group()
         if type == MnM:
             self.health = 20
             self.strength = 2
+        if type == MnM_RANGED:
+            self.health = 20
+            self.strength = 2
+            self.waitcount = 0
+            self.movecount = 0
+            x = random.randint(0,2)
+            if x == 0:
+                self.state = "wait2"
+                self.waitcount = random.randint(0,40)
+            if x == 1:
+                self.state = "move"
+                self.movepos[0] = random.randint(-1,1)*3
+                self.movepos[1] = random.randint(-1,1)*3
+                self.movecount = random.randint(0,60)
+            if x == 2:
+                self.state = "wait1"
+                self.waitcount = random.randint(0,40)
             
      
     def getmovepos(self):
@@ -150,20 +169,29 @@ class Monster(pygame.sprite.Sprite):
     
 
 class Projectile(pygame.sprite.Sprite):
-    def __init__(self, image):
+    def __init__(self, image, strength):
         pygame.sprite.Sprite.__init__(self)
         self.image = load_png(image)
         self.image = pygame.transform.scale(self.image, (16, 16))
-        self.rect = self.image.rect
+        self.rect = self.image.get_rect()
+        self.strength = strength
         self.movepos = [0,0]
+        screen = pygame.display.get_surface()
+        self.area = screen.get_rect()
+        self.cannot_collide = pygame.sprite.Group()
         
     def on_collision(self, sprite):
         if sprite.state != "invulnerable" and sprite.state != "hit":
-            sprite.health -= 2
+            sprite.health -= self.strength
             self.kill()
         
-    def update(self, charactersprites, walls):
+    def update(self, charactersprites):
         move(self, charactersprites, [], self.movepos)
+        for sprite in charactersprites.sprites():
+            if pygame.sprite.spritecollide(self, sprite.currentroom.obstacles, 0):
+                self.kill()
+        if not self.area.contains(self):
+            self.kill()
         pygame.event.pump()
 
 
@@ -221,6 +249,7 @@ class Sword(pygame.sprite.Sprite):
             monster.health -= self.strength
             if monster.health <= 0:
                 monster.kill()
+                pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'MonsterDeath'}))
             if character.last_direction_moved == "right":
                 monster.rect.left = self.rect.right
                 monster.movepos = [16, 0]
@@ -287,7 +316,7 @@ random.seed()
 
 def move(sprite, moveables, obstacles, movepos, realign = False):
     newpos = sprite.rect.move([movepos[0], 0])
-    if sprite.area.contains(newpos) and not realign:
+    if not realign:
         sprite.rect = newpos
     for obstacle in pygame.sprite.spritecollide(sprite, obstacles, 0):
         if movepos[0] > 0 and sprite.rect.right > obstacle.rect.left:
@@ -306,7 +335,7 @@ def move(sprite, moveables, obstacles, movepos, realign = False):
         if moveable == sprite:
             continue
         if movepos[0] > 0 and sprite.rect.right > moveable.rect.left:
-            if not sprite.can_collide.has(moveable) and not moveable.can_collide.has(sprite):
+            if not sprite.cannot_collide.has(moveable) and not moveable.cannot_collide.has(sprite):
                 sprite.rect.right = moveable.rect.left
             sprite.on_collision(moveable)
             moveable.on_collision(sprite)
@@ -315,7 +344,7 @@ def move(sprite, moveables, obstacles, movepos, realign = False):
                     continue
                 move(moveable2, moveables, obstacles, moveable2.getmovepos(), True)
         if movepos[0] < 0 and sprite.rect.left < moveable.rect.right:
-            if not sprite.can_collide.has(moveable) and not moveable.can_collide.has(sprite):
+            if not sprite.cannot_collide.has(moveable) and not moveable.cannot_collide.has(sprite):
                 sprite.rect.left = moveable.rect.right
             sprite.on_collision(moveable)
             moveable.on_collision(sprite)
@@ -324,7 +353,7 @@ def move(sprite, moveables, obstacles, movepos, realign = False):
                     continue
                 move(moveable2, moveables, obstacles, moveable2.getmovepos(), True)
     newpos = sprite.rect.move([0, movepos[1]])
-    if sprite.area.contains(newpos) and not realign:
+    if not realign:
         sprite.rect = newpos
     for obstacle in pygame.sprite.spritecollide(sprite, obstacles, 0):
         if movepos[1] > 0 and sprite.rect.bottom > obstacle.rect.top:
@@ -343,7 +372,7 @@ def move(sprite, moveables, obstacles, movepos, realign = False):
         if moveable == sprite:
             continue
         if movepos[1] > 0 and sprite.rect.bottom > moveable.rect.top:
-            if not sprite.can_collide.has(moveable) and not moveable.can_collide.has(sprite):
+            if not sprite.cannot_collide.has(moveable) and not moveable.cannot_collide.has(sprite):
                 sprite.rect.bottom = moveable.rect.top
             sprite.on_collision(moveable)
             moveable.on_collision(sprite)
@@ -352,7 +381,7 @@ def move(sprite, moveables, obstacles, movepos, realign = False):
                     continue
                 move(moveable2, moveables, obstacles, moveable2.getmovepos(), True)
         if movepos[1] < 0 and sprite.rect.top < moveable.rect.bottom:
-            if not sprite.can_collide.has(moveable) and not moveable.can_collide.has(sprite):
+            if not sprite.cannot_collide.has(moveable) and not moveable.cannot_collide.has(sprite):
                 sprite.rect.top = moveable.rect.bottom
             sprite.on_collision(moveable)
             moveable.on_collision(sprite)
@@ -371,17 +400,23 @@ class Room:
         self.moveables = pygame.sprite.RenderUpdates()
         self.walls = pygame.sprite.RenderUpdates()
         self.door_sprites = pygame.sprite.RenderUpdates()
+        self.projectiles = pygame.sprite.RenderUpdates()
         self.cord=cord
         
-    def add_monsters(self, charactersprites):
+    def add_monsters(self, charactersprites, level):
                 
         for i in range(random.randint(3,5)):
-            temp_monster = Monster(0, behaviors.blue_mnm)
+            x = random.randint(0,1)
+            if x == 0:
+                temp_monster = Monster(0, behaviors.blue_mnm)
+            if x == 1:
+                temp_monster = Monster(1, behaviors.green_mnm)
             temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-32), random.randint(0,temp_monster.area.bottom-32))
             while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
                or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
                     temp_monster.rect.topleft = (random.randint(0,temp_monster.area.right), random.randint(0,temp_monster.area.bottom))
             self.monsters.add(temp_monster)
+        level.num_monsters += i
         self.moveables.add(self.monsters)
         
     def __str__(self):
@@ -435,6 +470,8 @@ class Level:
         self.generateLevel()
         self.generateWalls()
         self.printGrid()
+        self.num_monsters = 0
+        
     def generateWalls(self):
         for i in range(self.SIZE):
             for j in range(self.SIZE):
