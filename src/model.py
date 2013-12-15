@@ -94,7 +94,7 @@ class Character(pygame.sprite.Sprite):
 class Monster(pygame.sprite.Sprite):
     def __init__(self, character, obstacles, monsters, type):
         pygame.sprite.Sprite.__init__(self)
-        self.image = load_png('slime.png')
+        self.image = load_png('mnm.png')
         self.image = pygame.transform.scale2x(self.image)
         self.rect = self.image.get_rect()
         screen = pygame.display.get_surface()
