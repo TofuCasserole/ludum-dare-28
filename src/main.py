@@ -6,7 +6,6 @@ Created on Dec 13, 2013
 import pygame
 from pygame.locals import *
 import model
-import gui
 
 def main():
     pygame.init()
@@ -21,7 +20,6 @@ def main():
         
     character = model.Character()
     
-    healthbar = gui.HealthBar()
     
     clock = pygame.time.Clock()
     
@@ -121,7 +119,6 @@ def main():
                         character.movepos[0] = -8
                     character.tryingmoveright = False
         screen.blit(background, (0,0))
-        healthbar.draw(screen)
         currentroom.walls.draw(screen)
         for monster in currentroom.monsters.sprites():
             screen.blit(monster.image, monster.rect)
