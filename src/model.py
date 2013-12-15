@@ -149,7 +149,7 @@ class Monster(pygame.sprite.Sprite):
         self.behavior(self, obstacles, moveables, character)
     
 
-class Projectiles(pygame.sprite.Sprite):
+class Projectile(pygame.sprite.Sprite):
     def __init__(self, image):
         pygame.sprite.Sprite.__init__(self)
         self.image = load_png(image)
@@ -162,7 +162,7 @@ class Projectiles(pygame.sprite.Sprite):
             sprite.health -= 2
             self.kill()
         
-    def update(self, charactersprites):
+    def update(self, charactersprites, walls):
         move(self, charactersprites, [], self.movepos)
         pygame.event.pump()
 

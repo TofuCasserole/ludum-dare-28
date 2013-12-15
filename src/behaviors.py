@@ -6,6 +6,7 @@ Created on Dec 15, 2013
 
 import pygame
 import model
+import random
 
 def blue_mnm(object, obstacles, moveables, character):
     if object.state == "hit":
@@ -47,3 +48,53 @@ def blue_mnm(object, obstacles, moveables, character):
         if not current_collision in pygame.sprite.spritecollide(object, moveables, 0):
             object.can_collide.remove(current_collision)
     pygame.event.pump()
+
+def green_mnm(object, obstacles, moveables, characters):
+    if object.state == "hit":
+        if object.hitcount < 15:
+            object.hitcount += 1
+        else:
+            object.hitcount = 0
+            object.pushcount = 0
+            object.waitcount = 0
+            object.movecount = 0
+            object.state = "wait2"
+            for current_collisions in pygame.sprite.spritecollide(object, moveables,0):
+                object.can_collide.add(current_collisions)
+        model.move(object, moveables, obstacles, object.movepos)
+        pygame.event.pump()
+        return
+   
+    if object.state == "pushback":
+        if object.pushcount < 2:
+            object.pushcount += 1
+        else:
+            object.pushcount = 0
+            object.movepos = [0,0]
+            object.state = "wait2"
+            
+    if object.state == "wait2":
+        if object.waitcount < 40:
+            object.waitcount += 1
+        else:
+            random.seed()
+            object.waitcount = 0
+            object.movepos[0] = random.randint(-1,1)*3
+            object.movepos[1] = random.randint(-1,1)*3
+            object.state = "move"
+            
+    if object.state == "move":
+        if object.movecount < 60:
+            object.movecount += 1
+        else:
+            object.movecount = 0
+            object.movepos = [0,0]
+            object.state = "wait1"
+            
+    if object.state == "wait1":
+        if object.waitcount < 40:
+            object.waitcount += 1
+        else:
+            myProjectile = model.Projectile()
+            object.waitcount = 0
+            object.state = "wait2"
