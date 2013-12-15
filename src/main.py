@@ -126,12 +126,13 @@ def main():
         for monster in currentroom.monsters.sprites():
             screen.blit(monster.image, monster.rect)
         charactersprites.update(obstacles, moveables)
+        currentroom.door_sprites.update(character)
         sword.update(character, monsters)
         charactersprites.draw(screen)
         monsters.update(obstacles, moveables, character)
         monsters.draw(screen)
         obstacles.draw(screen)
-        currentroom.door_sprites.update(character)
+        currentroom.door_sprites.draw(screen)
         sword.draw(screen)
         pygame.display.flip()
 
