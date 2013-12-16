@@ -18,7 +18,7 @@ def main():
     for x in range(32,640,32):
         for y in range(0,480,32):
             background.blit(dirt, (x,y))
-    levelNumber=1 
+    levelNumber=1
     inventory = pygame.Surface((528,368))
     panel = pygame.surface.Surface((242, 32))
     panel.fill((192,192,192))
@@ -26,6 +26,13 @@ def main():
     selector.fill((255,0,255))
     l=model.Level(levelNumber)
     character = model.Character()
+    has_runes = [True, True, True, False, False, False, False, False]
+    runes_pictures = [pygame.transform.scale2x(utils.load_png('rune1.png')),
+                      pygame.transform.scale2x(utils.load_png('rune2.png')),
+                      pygame.transform.scale2x(utils.load_png('rune3.png'))]
+    runes_text = ["Fully restore character health",
+                  "Reduce damage taken by 50% in this room",
+                  "Double attack damage in this room"]
     
     healthbar = gui.HealthBar()
     
@@ -83,12 +90,21 @@ def main():
                     pygame.display.flip()
                     exit_inventory = False
                     item_selected = 0
+                    
                     while(1):
                         inventory.fill((224,224,224))
                         inventory = inventory.convert()
                         utils.text_format(inventory, "INVENTORY", 24, (170,0), (0, 0, 255), 28)
                         utils.text_format(inventory, "Runes:", 16, (360, 34), (255,0,0),20)
                         utils.text_format(inventory, "Buffs:", 16, (100, 34), (255,0,255),20)
+                        
+                        i = 0
+                        runes = []
+                        for rune in has_runes:
+                            if rune == True:
+                                runes.append(i)
+                            i += 1
+                        
                         event_list = [event for event in pygame.event.get()]
                         for event in event_list:
                             if event.type == QUIT:
@@ -97,11 +113,15 @@ def main():
                                 if event.key == K_i:
                                     exit_inventory = True
                                 elif event.key == K_DOWN:
-                                    if (item_selected <7):
+                                    if (item_selected <(len(runes)-1)):
                                         item_selected += 1
                                 elif event.key == K_UP:
                                     if (item_selected>0):
-                                        item_selected -= 1  
+                                        item_selected -= 1
+                                elif event.key == K_RETURN:
+                                    rune_num = runes[item_selected]
+                                    has_runes[rune_num] = False
+                                    character.rune_effects[rune_num] = True
                         if exit_inventory:
                             break
                         inventory.blit(selector, (270,62+36*item_selected))
@@ -109,6 +129,12 @@ def main():
                             inventory.blit(panel, (272, y+2))
                         for y in range(62,350,36):
                             inventory.blit(panel, (16, y+2))
+                        
+                        i = 0
+                        for rune in runes:
+                            inventory.blit(runes_pictures[rune], (274,64+36*i))
+                            utils.text_format(inventory, runes_text[rune], 8, (312,66+36*i), (255, 255, 255), 20)
+                            i += 1
                         screen.blit(inventory, (56,56))
                         pygame.display.flip()
                 elif event.key == K_e:
@@ -191,7 +217,7 @@ def main():
             break
         screen.blit(background, (0,0))
         healthbar.health = character.health
-        healthbar.draw(screen)
+        healthbar.draw(screen, l)
         character.currentroom.walls.draw(screen)
         character.currentroom.monsters.draw(screen)
         character.currentroom.projectiles.draw(screen)
@@ -207,7 +233,7 @@ def main():
         character.currentroom.monsters.update(character.currentroom.walls, character.currentroom.moveables, character)
         #obstacles.draw(screen)
         character.currentroom.door_sprites.update(character, l)
-        character.currentroom.medbay.update(character)
+        character.currentroom.medbay.update(character, l)
         sword.draw(screen)
         pygame.display.flip()
     alpha = pygame.Surface(screen.get_size())

@@ -24,12 +24,15 @@ def convert_to_unit_vector(x1, x2, y1, y2):
         y_speed *= -1
     return (x_speed, y_speed)
 
-def text_format(surface, string, size, position, color = (66,66,66), maxlength = 30):
+def text_format(surface, string, size, position, color = (66,66,66), try_to_end_line = 30):
     font = pygame.font.Font("../res/SWFIT_SL.TTF", size)
     substring_list = []
-    while len(string) > maxlength:
-        substring_list.append(string[:maxlength])
-        string = string[60:]
+    while len(string) > try_to_end_line:
+        i = try_to_end_line-1
+        while (string[i] != ' '):
+            i+=1
+        substring_list.append(string[:i])
+        string = string[i+1:]
     substring_list.append(string)
     substring_objects = []
     for substring in substring_list:

@@ -48,7 +48,7 @@ class Character(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
-        self.health = 1
+        self.health = 100
         #self.room = start_room
         self.movepos = [0,0]
         self.tryingmoveright = False
@@ -64,6 +64,7 @@ class Character(pygame.sprite.Sprite):
         self.rect.midleft = self.area.midleft
         self.rect = self.rect.move([74,0])
         self.cannot_collide = pygame.sprite.Group()
+        self.rune_effects = [False, False, False, False, False, False, False, False]
     
     def getmovepos(self):
         if self.state == "hit":
@@ -74,8 +75,15 @@ class Character(pygame.sprite.Sprite):
     def on_collision(self, sprite):
         if self.state == "move" and isinstance(sprite, Monster):
             self.health -= sprite.strength
+            if self.rune_effects[1]:
+                print("taking 50% damage")
+                self.health += sprite.strength/2
         
     def update(self, obstacles, moveables, sword):
+        if self.rune_effects[0]:
+            self.health = 100
+            self.rune_effects[0] = False
+        
         self.sword_cooldown += 1
         if self.state == "hit":
             if self.hitcount < 5:
@@ -126,6 +134,8 @@ class Monster(pygame.sprite.Sprite):
         if type == MnM:
             self.health = 20
             self.strength = 2
+            self.movecount = 0
+            self.waitcount = 0
         if type == MnM_RANGED:
             self.health = 20
             self.strength = 2
@@ -259,6 +269,9 @@ class Sword(pygame.sprite.Sprite):
         for monster in pygame.sprite.spritecollide(self, monsters, 0):
             monster.state = "pushback"
             monster.health -= self.strength
+            if character.rune_effects[2]:
+                monster.health -= self.strength
+                print "Weapon dealt double damage"
             if monster.health <= 0:
                 monster.kill()
                 if monster.isBoss:
@@ -301,21 +314,25 @@ class Door(pygame.sprite.Sprite):
     def update(self, character, l):
         if pygame.sprite.collide_mask(self, character):
             if self.rect.left == 320 and self.rect.top == 0:
+                character.rune_effects = [False, False, False, False, False, False, False, False]
                 character.rect.y = 416
                 character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['north'])
                 character.currentroom.moveables.add(character)
             elif self.rect.left == 320 and self.rect.top == 448:
+                character.rune_effects = [False, False, False, False, False, False, False, False]
                 character.rect.y = 32                
                 character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['south'])
                 character.currentroom.moveables.add(character)
             elif self.rect.top == 224 and self.rect.left == 32:
+                character.rune_effects = [False, False, False, False, False, False, False, False]
                 character.rect.x = 576
                 character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['west'])
                 character.currentroom.moveables.add(character)
             elif self.rect.top == 224 and self.rect.left == 608:
+                character.rune_effects = [False, False, False, False, False, False, False, False]
                 character.rect.x = 64
                 character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['east'])
@@ -340,7 +357,7 @@ class MedBay(pygame.sprite.Sprite):
         self.can_heal = False
         self.health = 25
         
-    def update(self, character):
+    def update(self, character, level):
         if pygame.sprite.collide_rect(self, character) and self.health > 0 and character.health < 100:
             self.can_heal = True
         else:
@@ -349,6 +366,7 @@ class MedBay(pygame.sprite.Sprite):
         if self.is_healing:
             self.health -= .25
             character.health += .25
+            level.health -= .25
                 
 class BossDoor(pygame.sprite.Sprite):
     def __init__(self, location):
@@ -569,6 +587,7 @@ class Level:
             self.generateObstacles()
             self.addmedbay()
             self.num_monsters = 0
+            self.health = 25
     def addmedbay(self):
         mylist = [i for i in self.getAllRooms() if i.cord != self.bossRoom]
         random.shuffle(mylist)
