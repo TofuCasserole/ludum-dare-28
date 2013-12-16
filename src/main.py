@@ -11,7 +11,7 @@ import gui
 def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
-    
+    myFont = pygame.font.Font('../res/SWFIT_SL.TTF', 24)
     dirt = pygame.transform.scale2x(model.load_png("dirt.png"))
     background = pygame.Surface(screen.get_size())
     background = background.convert()
@@ -82,11 +82,28 @@ def main():
                     obstacles.add(character.currentroom.walls)
                     continue
             elif event.type == KEYDOWN:
-                if event.key == K_e:
+                if event.key == K_TAB:
+                    alpha = pygame.Surface(screen.get_size())
+                    alpha.fill((0,0,0))
+                    alpha.set_alpha(128)
+                    screen.blit(alpha, (0,0))
+                    pygame.display.flip()
+                    exit_inventory = False
+                    while(1):
+                        event_list = [event for event in pygame.event.get()]
+                        for event in event_list:
+                            if event.type == QUIT:
+                                return
+                            elif event.type == KEYDOWN:
+                                if event.key == K_TAB:
+                                    exit_inventory = True
+                        if exit_inventory:
+                            break
+                elif event.key == K_e:
                     for room in l.getAllRooms():
                         if room.medbay.sprites() != [] and room.medbay.sprites()[0].can_heal == True:
                             room.medbay.sprites()[0].is_healing = True
-                if event.key == K_SPACE or event.key == K_RETURN:
+                elif event.key == K_SPACE or event.key == K_RETURN:
                     if sword.sprites() == [] and character.sword_cooldown > 10:
                         sword.add(model.Sword(character))
                 elif event.key == K_a:
@@ -158,6 +175,8 @@ def main():
                     else:
                         character.movepos[0] = -6
                     character.tryingmoveright = False
+        if character.health <= 0:
+            break
         screen.blit(background, (0,0))
         healthbar.health = character.health
         healthbar.draw(screen)
@@ -181,6 +200,20 @@ def main():
         character.currentroom.levelExit.update(character)
         sword.draw(screen)
         pygame.display.flip()
-
+    alpha = pygame.Surface(screen.get_size())
+    for x in range(64):
+        clock.tick(32)
+        alpha.fill((0,0,0))
+        alpha.set_alpha(2)
+        screen.blit(alpha, (0,0))
+        pygame.display.flip()
+    game_over = myFont.render("Game Over.", False, (255,0,0))
+    screen.blit(game_over, (320,240))
+    pygame.display.flip()
+    while(1):    
+        event_list = [event for event in pygame.event.get()]
+        for event in event_list:
+            if event.type == QUIT:
+                return
 if __name__ == '__main__':
     main()
