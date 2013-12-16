@@ -11,11 +11,6 @@ boss_types = [2]
 
 MONSTER_IMAGES = ['mnm.png', 'green_mnm.png','mnm.png']
 
-UP = 0
-DOWN = 32
-LEFT = 64
-RIGHT = 96
-
 EAST = "east"
 WEST = "west"
 NORTH = "north"
@@ -29,7 +24,6 @@ import random
 import pygame
 import main
 import behaviors
-import spritesheet
 from pygame.locals import *
 
 def load_png(name):
@@ -113,41 +107,45 @@ class Character(pygame.sprite.Sprite):
         
 
 class Monster(pygame.sprite.Sprite):
-    
     def __init__(self, type, behavior, isBoss=False):
-        pygame.sprite.Sprite.__init__(self)
-        self.dir = SOUTH
         self.behavior = behavior
-        self.image = spritesheet.SpriteSheet(load_png(MONSTER_IMAGES[type]))
+        pygame.sprite.Sprite.__init__(self)
+        self.image = load_png(MONSTER_IMAGES[type])
         self.image = pygame.transform.scale2x(self.image)
         self.rect = self.image.get_rect()
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         random.seed()
+        self.state = "chase"
         self.movepos = [0,0]
         self.hitcount = 0
         self.pushcount = 0
         self.cannot_collide = pygame.sprite.Group()
-        self.health = 20
-        self.strength = 2
-        self.waitcount = 0
-        self.movecount = 0
-        x = random.randint(0,2)
-        if x == 1:
-            self.state = "move"
-            self.movepos[0] = random.randint(-1,1)*3
-            self.movepos[1] = random.randint(-1,1)*3
-            self.movecount = random.randint(0,60)
-            self.waitcount = random.randint(0,40)
+<<<<<<< HEAD
         self.isBoss=isBoss
-		self.type = type
+=======
+        self.type = type
+>>>>>>> cf1407db4a69475e806c8a5f71822a5de307720c
         if type == MnM:
-            self.state = "wait"
-        elif type == MnM_RANGED:
+            self.health = 20
+            self.strength = 2
+        if type == MnM_RANGED:
+            self.health = 20
+            self.strength = 2
+            self.waitcount = 0
+            self.movecount = 0
+            x = random.randint(0,2)
             if x == 0:
                 self.state = "wait2"
+                self.waitcount = random.randint(0,40)
+            if x == 1:
+                self.state = "move"
+                self.movepos[0] = random.randint(-1,1)*3
+                self.movepos[1] = random.randint(-1,1)*3
+                self.movecount = random.randint(0,60)
             if x == 2:
                 self.state = "wait1"
+                self.waitcount = random.randint(0,40)
         if type==BOSS:
             self.health=50
             self.strength=5
@@ -502,12 +500,19 @@ class Room:
                or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
                     temp_monster.rect.topleft = (random.randint(0,temp_monster.area.right), random.randint(0,temp_monster.area.bottom))
             self.monsters.add(temp_monster)
-        level.num_monsters += i
         self.moveables.add(self.monsters)
         
-  
+<<<<<<< HEAD
     def generateWalls(self):
         #print(self.doors)
+=======
+    def __str__(self):
+        return str(self.cord)+':'+str(self.connectingRooms)
+    def __repr__(self):
+        return self.__str__()
+    def generateWalls(self, level):
+        print(self.doors)
+>>>>>>> cf1407db4a69475e806c8a5f71822a5de307720c
         if self.obstacles!=None and self.monsters!=None:
             possible_locations = [(x,y) for x in range(0, WIDTH) for y in range (0, LENGTH) if (x,y) not in self.obstacles]
             random.shuffle(possible_locations)
@@ -582,7 +587,7 @@ class Level:
         for i in range(self.SIZE):
             for j in range(self.SIZE):
                 if isinstance(self.levelGrid[i][j],Room):
-                    self.levelGrid[i][j].generateWalls()
+                    self.levelGrid[i][j].generateWalls(self)
     def getLocation(self, gridCords):
         return self.levelGrid[gridCords[0]][gridCords[1]]
     def getAllRooms(self):
