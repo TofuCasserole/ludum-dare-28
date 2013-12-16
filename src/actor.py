@@ -23,11 +23,10 @@ class Actor(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.respawns = respawns
         self.isdirectional = directional
-        img = pygame.transform.scale2x(utils.load_png(image))
-        temp_rect = img.get_rect()
+        temp_rect = image.get_rect()
         if directional:
             self.dir = DOWN
-            sheet = spritesheet.SpriteSheet(img)
+            sheet = spritesheet.SpriteSheet(image)
             self.default_img = sheet.image_at(rectangle)
             upsheet = sheet.subsheet(Rect(0,0,temp_rect.w,rectangle.h))
             downsheet = sheet.subsheet(Rect(0,32,temp_rect.w,rectangle.h))
@@ -37,11 +36,10 @@ class Actor(pygame.sprite.Sprite):
             self.downanims = dict(map(lambda (k,v): create_anim(k,v,downsheet), state_anims.iteritems()))
             self.leftanims = dict(map(lambda (k,v): create_anim(k,v,leftsheet), state_anims.iteritems()))
             self.rightanims = dict(map(lambda (k,v): create_anim(k,v,rightsheet), state_anims.iteritems()))
-            self.default_img = sheet.image_at(rectangle)
             self.current_anim = self.downanims.get(self.state).iter()
             self.image = self.downanims.get(self.state).next()
         else:
-            self.image = img
+            self.image = image
         self.rect = rectangle
         self.movepos = [0,0]
         

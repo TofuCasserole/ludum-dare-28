@@ -11,6 +11,7 @@ import pygame
 from pygame import Rect
 from pygame.locals import *
 import random
+import utils
 
 MNM = {'name':'mnm', 'image':'mnm.png', 'behavior':behaviors.blue_mnm,
        'health':20, 'strength':2, 'is_boss':False, 'random_state':False,
@@ -31,7 +32,9 @@ class Monster(actor.Actor):
         else:
             self.state = mon_type['init_state'][0]
         self.prev_state = self.state
-        actor.Actor.__init__(self, mon_type['image'],
+        img = utils.load_png(mon_type['image'])
+        img = pygame.transform.scale2x(img)
+        actor.Actor.__init__(self, img,
                              Rect(0,0,mon_type['size'],mon_type['size']),
                              mon_type['state_anims'],
                              respawns = mon_type['is_boss'])
