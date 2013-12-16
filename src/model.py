@@ -342,17 +342,17 @@ class MedBay(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = (576,416)
         self.can_heal = False
-        self.health = 20
+        self.health = 25
         
     def update(self, character):
-        if pygame.sprite.collide_rect(self, character) and self.health > 0:
+        if pygame.sprite.collide_rect(self, character) and self.health > 0 and character.health < 100:
             self.can_heal = True
         else:
             self.can_heal = False
             self.is_healing = False
         if self.is_healing:
-            self.health -= 1
-            character.health += 1
+            self.health -= .25
+            character.health += .25
                 
 class BossDoor(pygame.sprite.Sprite):
     def __init__(self, location):
@@ -491,22 +491,21 @@ class Room:
             self.moveables.add(self.monsters)
             return
         for i in range(random.randint(3,5)):
-            level.num_monsters += 1
             x = random.randint(0,1)
             if x == 0:
                 temp_monster = Monster(0, behaviors.blue_mnm)
             if x == 1:
                 temp_monster = Monster(1, behaviors.green_mnm)
-            temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-32), random.randint(0,temp_monster.area.bottom-32))
+            temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-64), random.randint(0,temp_monster.area.bottom-64))
             while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
                or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
                     temp_monster.rect.topleft = (random.randint(0,temp_monster.area.right), random.randint(0,temp_monster.area.bottom))
             self.monsters.add(temp_monster)
-        level.num_monsters += i
+        level.num_monsters += len(self.monsters.sprites())
         self.moveables.add(self.monsters)
         
   
-    def generateWalls(self):
+    def generateWalls(self, level):
         #print(self.doors)
         if self.obstacles!=None and self.monsters!=None:
             possible_locations = [(x,y) for x in range(0, WIDTH) for y in range (0, LENGTH) if (x,y) not in self.obstacles]
@@ -582,7 +581,7 @@ class Level:
         for i in range(self.SIZE):
             for j in range(self.SIZE):
                 if isinstance(self.levelGrid[i][j],Room):
-                    self.levelGrid[i][j].generateWalls()
+                    self.levelGrid[i][j].generateWalls(self)
     def getLocation(self, gridCords):
         return self.levelGrid[gridCords[0]][gridCords[1]]
     def getAllRooms(self):
