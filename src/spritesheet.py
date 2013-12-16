@@ -6,6 +6,7 @@
 # (x, y, x + offset, y + offset)
  
 import pygame
+from pygame.locals import SRCALPHA
  
 class SpriteSheet(object):
     
@@ -19,7 +20,7 @@ class SpriteSheet(object):
     def image_at(self, rectangle):
         "Loads image from x,y,x+offset,y+offset"
         rect = pygame.Rect(rectangle)
-        image = pygame.Surface(rect.size).convert_alpha()
+        image = pygame.Surface(rect.size, flags=SRCALPHA).convert_alpha()
         image.blit(self.sheet, (0, 0), rect)
         return image
     # Load a whole bunch of images and return them as a list
@@ -41,7 +42,7 @@ class SpriteStripAnim(object):
     __add__() method for joining strips which comes in handy when a
     strip wraps to the next row.
     """
-    def __init__(self, sheet, rects, loop=False, frames=1):
+    def __init__(self, sheet, rects, loop=True, frames=1):
         """construct a SpriteStripAnim
         
         filename, rect, count, and colorkey are the same arguments used

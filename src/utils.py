@@ -42,10 +42,7 @@ def load_png(name):
     fullname = os.path.join('../', 'res', name)
     try:
         image = pygame.image.load(fullname)
-        if image.get_alpha() is None:
-            image = image.convert()
-        else:
-            image = image.convert_alpha()
+        image = image.convert_alpha()
     except pygame.error, message:
             print 'Cannot load image:', fullname
             raise SystemExit, message

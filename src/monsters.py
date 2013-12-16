@@ -8,18 +8,32 @@ import actor
 import behaviors
 import model
 import pygame
+from pygame import Rect
 from pygame.locals import *
 import random
 
 MNM = {'name':'mnm', 'image':'mnm.png', 'behavior':behaviors.blue_mnm,
        'health':20, 'strength':2, 'is_boss':False, 'random_state':False,
-       'init_state':['wait'], 'size': 32}
+       'init_state':['wait'], 'size': 32,
+       'state_anims':{'wait':([Rect(0,0,32,32)], True, 1),
+                      'move':([Rect(0,0,32,32), Rect(32,0,32,32),
+                               Rect(0,0,32,32), Rect(32,0,32,32)],
+                              True, 8),
+                      'windup':([Rect(96,0,32,32)], True, 1),
+                      'jump':([Rect(128,0,32,32)], True, 1)}
+        }
 
 class Monster(actor.Actor):
     
     def __init__(self, mon_type):
+        if mon_type['random_state']:
+            self.state = random.choice(mon_type['init_state'])
+        else:
+            self.state = mon_type['init_state'][0]
+        self.prev_state = self.state
         actor.Actor.__init__(self, mon_type['image'],
-                             pygame.Rect(0,0,mon_type['size'],mon_type['size']), 
+                             Rect(0,0,mon_type['size'],mon_type['size']),
+                             mon_type['state_anims'],
                              respawns = mon_type['is_boss'])
         self.name = mon_type['name']
         self.behavior = mon_type['behavior']
@@ -35,10 +49,6 @@ class Monster(actor.Actor):
         self.movecount = 0
         self.isBoss=mon_type['is_boss']
         random.seed()
-        if mon_type['random_state']:
-            self.state = random.choice(mon_type['init_state'])
-        else:
-            self.state = mon_type['init_state'][0]
         if self.state == 'wait':
             self.waitcount == random.randint(0,40)
     
