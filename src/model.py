@@ -409,6 +409,17 @@ class Door(pygame.sprite.Sprite):
                 monster.rect.left = self.rect.right
             elif self.rect.top == 224 and self.rect.left == 608:
                 monster.rect.right = self.rect.left
+class Elevator(pygame.sprite.Sprite):
+    def __init__(self): 
+        pygame.sprite.Sprite.__init__(self)
+        self.image=load_png('bossdoor.png') 
+        self.image = pygame.transform.scale(self.image, (32, 32))
+        self.rect = self.image.get_rect()
+        self.rect.topleft=(200,200)
+        #self.rect.topleft = ((640/2)+32,480)
+    def update(self, character):
+        if pygame.sprite.collide_rect(self, character):
+            pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'ChangeLevel'}))
 
 class MedBay(pygame.sprite.Sprite):
     def __init__(self):
@@ -556,7 +567,7 @@ class Room:
         self.bossdoors = pygame.sprite.RenderUpdates()
         self.medbay = pygame.sprite.RenderUpdates()
         self.cord=cord
-        
+        self.levelExit=pygame.sprite.RenderUpdates() 
     def add_monsters(self, charactersprites, level):
         if level.bossRoom==self.cord:
             temp_monster = monsters.Monster(monsters.BOSS)

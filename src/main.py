@@ -83,7 +83,12 @@ def main():
                             if room.bossdoors.sprites() != []:
                                 room.door_sprites.add(model.Door(room.bossdoors.sprites()[0].rect.topleft))
                                 room.bossdoors.empty()
-                elif event.subtype=='BossDeath':
+                if event.subtype=='BossDeath':
+                    print 'boss death'
+                    l.getLocation(l.bossRoom).bossdoors.empty()
+                    el=model.Elevator()
+                    l.getLocation(l.bossRoom).levelExit.add(el)
+                if event.subtype=='ChangeLevel':
                     #now we have to start a new level!
                     levelNumber+=1
                     l=model.Level(levelNumber)
@@ -324,6 +329,9 @@ def main():
         character.currentroom.bossdoors.update(character.currentroom.moveables)
         character.currentroom.monsters.update(character.currentroom.walls, character.currentroom.moveables, character)
         #obstacles.draw(screen)
+        if character.currentroom.cord==l.bossRoom:
+            character.currentroom.levelExit.draw(screen)
+            character.currentroom.levelExit.update(character)
         character.currentroom.door_sprites.update(character, l)
         character.currentroom.medbay.update(character, l)
         sword.draw(screen)
