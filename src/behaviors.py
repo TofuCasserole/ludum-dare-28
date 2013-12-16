@@ -117,3 +117,30 @@ def green_mnm(object, obstacles, moveables, character):
         if not current_collision in pygame.sprite.spritecollide(object, moveables, 0):
             object.cannot_collide.remove(current_collision)
     pygame.event.pump()
+
+def Boss(object, obstacles, moveables, character):
+    #states that can be chosen at random, move should not be a part of this
+    states=['wait', 'charge', 'wander','walk_to_center']
+    #wait state 
+    if object.state == "wait":
+        if object.waitcount < 40:
+            object.waitcount += 1
+        else:
+            object.waitcount = 0
+            object.state = random.choice(states)
+
+    if object.state==wander:
+        object.movepos[0] = random.randint(-1,1)*3
+        object.movepos[1] = random.randint(-1,1)*3
+        object.state = "move"
+
+    if object.state == "move":
+        if object.movecount < 60:
+            object.movecount += 1
+        else:
+            object.movecount = 0
+            object.movepos = [0,0]
+            object.state = "wait"
+    
+    if object.state=='walk_to_center':
+        pass
