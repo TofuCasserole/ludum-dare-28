@@ -337,17 +337,17 @@ class MedBay(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = (576,416)
         self.can_heal = False
-        self.health = 20
+        self.health = 25
         
     def update(self, character):
-        if pygame.sprite.collide_rect(self, character) and self.health > 0:
+        if pygame.sprite.collide_rect(self, character) and self.health > 0 and character.health < 100:
             self.can_heal = True
         else:
             self.can_heal = False
             self.is_healing = False
         if self.is_healing:
-            self.health -= 1
-            character.health += 1
+            self.health -= .25
+            character.health += .25
                 
 class BossDoor(pygame.sprite.Sprite):
     def __init__(self, location):
