@@ -12,7 +12,7 @@ import utils
 def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
-    dirt = pygame.transform.scale2x(model.load_png("dirt.png"))
+    dirt = pygame.transform.scale2x(utils.load_png("dirt.png"))
     background = pygame.Surface(screen.get_size())
     background = background.convert()
     for x in range(32,640,32):
@@ -126,7 +126,7 @@ def main():
                     if cont: continue
                     character.movepos[0] = -6
                     character.tryingmoveleft = True
-                    character.lasst_direction_moved = "left"
+                    character.last_direction_moved = "left"
                 elif event.key == K_w:
                     cont = False
                     for event2 in event_list:

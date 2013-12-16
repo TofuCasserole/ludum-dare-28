@@ -11,11 +11,6 @@ boss_types = [2]
 
 MONSTER_IMAGES = ['mnm.png', 'green_mnm.png','mnm.png']
 
-UP = 0
-DOWN = 32
-LEFT = 64
-RIGHT = 96
-
 EAST = "east"
 WEST = "west"
 NORTH = "north"
@@ -29,7 +24,6 @@ import random
 import pygame
 import main
 import behaviors
-import spritesheet
 from pygame.locals import *
 
 def load_png(name):
@@ -68,7 +62,6 @@ class Character(pygame.sprite.Sprite):
         self.hitmove = [0,0]
         self.sword_cooldown = 30
         self.rect.midleft = self.area.midleft
-        
         self.rect = self.rect.move([74,0])
         self.cannot_collide = pygame.sprite.Group()
     
@@ -114,41 +107,42 @@ class Character(pygame.sprite.Sprite):
         
 
 class Monster(pygame.sprite.Sprite):
-    
     def __init__(self, type, behavior, isBoss=False):
-        pygame.sprite.Sprite.__init__(self)
-        self.dir = SOUTH
         self.behavior = behavior
+        pygame.sprite.Sprite.__init__(self)
         self.image = load_png(MONSTER_IMAGES[type])
         self.image = pygame.transform.scale2x(self.image)
         self.rect = self.image.get_rect()
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         random.seed()
+        self.state = "chase"
         self.movepos = [0,0]
         self.hitcount = 0
         self.pushcount = 0
         self.cannot_collide = pygame.sprite.Group()
-        self.health = 20
-        self.strength = 2
-        self.waitcount = 0
-        self.movecount = 0
-        x = random.randint(0,2)
-        if x == 1:
-            self.state = "move"
-            self.movepos[0] = random.randint(-1,1)*3
-            self.movepos[1] = random.randint(-1,1)*3
-            self.movecount = random.randint(0,60)
-            self.waitcount = random.randint(0,40)
         self.isBoss=isBoss
         self.type = type
         if type == MnM:
-            self.state = "wait"
-        elif type == MnM_RANGED:
+            self.health = 20
+            self.strength = 2
+        if type == MnM_RANGED:
+            self.health = 20
+            self.strength = 2
+            self.waitcount = 0
+            self.movecount = 0
+            x = random.randint(0,2)
             if x == 0:
                 self.state = "wait2"
+                self.waitcount = random.randint(0,40)
+            if x == 1:
+                self.state = "move"
+                self.movepos[0] = random.randint(-1,1)*3
+                self.movepos[1] = random.randint(-1,1)*3
+                self.movecount = random.randint(0,60)
             if x == 2:
                 self.state = "wait1"
+                self.waitcount = random.randint(0,40)
         if type==BOSS:
             self.health=50
             self.strength=5

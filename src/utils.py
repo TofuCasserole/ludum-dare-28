@@ -5,6 +5,7 @@ Created on Dec 15, 2013
 '''
 
 import math
+import os
 import pygame
 
 def distance(coorda, coordb):
@@ -36,3 +37,16 @@ def text_format(surface, string, size, position, color = (66,66,66), maxlength =
     for i in range(len(substring_objects)):
         surface.blit(substring_objects[i], (position[0],position[1]+i*font.get_linesize()))
 
+def load_png(name):
+    """ Load image and return image object"""
+    fullname = os.path.join('../', 'res', name)
+    try:
+        image = pygame.image.load(fullname)
+        if image.get_alpha() is None:
+            image = image.convert()
+        else:
+            image = image.convert_alpha()
+    except pygame.error, message:
+            print 'Cannot load image:', fullname
+            raise SystemExit, message
+    return image
