@@ -55,11 +55,8 @@ def main():
                     l.num_monsters -= 1
                     print "Monsters Left", l.num_monsters   
                     if l.num_monsters == 0:
-                        print("Level Clear!")
-                        for room in l.getAllRooms():
-                            if room.bossdoors.sprites() != []:
-                                room.door_sprites.add(model.Door(room.bossdoors.sprites()[0].rect.topleft))
-                                room.bossdoors.empty()
+<<<<<<< HEAD
+                        print "Level Clear!"
                 if event.subtype=='BossDeath':
                     #now we have to start a new level!
                     levelNumber+=1
@@ -69,6 +66,13 @@ def main():
                         room.add_monsters(charactersprites, l)
                     obstacles.add(character.currentroom.walls)
                     continue
+=======
+                        print("Level Clear!")
+                        for room in l.getAllRooms():
+                            if room.bossdoors.sprites() != []:
+                                room.door_sprites.add(model.Door(room.bossdoors.sprites()[0].rect.topleft))
+                                room.bossdoors.empty()
+>>>>>>> cf1407db4a69475e806c8a5f71822a5de307720c
             elif event.type == KEYDOWN:
                 if event.key == K_e:
                     for room in l.getAllRooms():
@@ -167,6 +171,5 @@ def main():
         character.currentroom.medbay.update(character)
         sword.draw(screen)
         pygame.display.flip()
-
 if __name__ == '__main__':
     main()

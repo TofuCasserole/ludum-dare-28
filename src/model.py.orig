@@ -121,8 +121,11 @@ class Monster(pygame.sprite.Sprite):
         self.hitcount = 0
         self.pushcount = 0
         self.cannot_collide = pygame.sprite.Group()
+<<<<<<< HEAD
         self.isBoss=isBoss
-		self.type = type
+=======
+        self.type = type
+>>>>>>> cf1407db4a69475e806c8a5f71822a5de307720c
         if type == MnM:
             self.health = 20
             self.strength = 2
@@ -497,12 +500,19 @@ class Room:
                or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
                     temp_monster.rect.topleft = (random.randint(0,temp_monster.area.right), random.randint(0,temp_monster.area.bottom))
             self.monsters.add(temp_monster)
-        level.num_monsters += i
         self.moveables.add(self.monsters)
         
-  
+<<<<<<< HEAD
     def generateWalls(self):
         #print(self.doors)
+=======
+    def __str__(self):
+        return str(self.cord)+':'+str(self.connectingRooms)
+    def __repr__(self):
+        return self.__str__()
+    def generateWalls(self, level):
+        print(self.doors)
+>>>>>>> cf1407db4a69475e806c8a5f71822a5de307720c
         if self.obstacles!=None and self.monsters!=None:
             possible_locations = [(x,y) for x in range(0, WIDTH) for y in range (0, LENGTH) if (x,y) not in self.obstacles]
             random.shuffle(possible_locations)
@@ -577,7 +587,7 @@ class Level:
         for i in range(self.SIZE):
             for j in range(self.SIZE):
                 if isinstance(self.levelGrid[i][j],Room):
-                    self.levelGrid[i][j].generateWalls()
+                    self.levelGrid[i][j].generateWalls(self)
     def getLocation(self, gridCords):
         return self.levelGrid[gridCords[0]][gridCords[1]]
     def getAllRooms(self):
