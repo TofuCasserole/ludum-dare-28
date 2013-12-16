@@ -334,6 +334,8 @@ class Sword(pygame.sprite.Sprite):
                 monster.health -= self.strength*3
                 print "Weapon dealt quadruple damage"
             if monster.health <= 0:
+                if character.buff_effects[0]:
+                    character.health += 5
                 monster.kill()
                 if monster.isBoss:
                     pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'BossDeath'}))
