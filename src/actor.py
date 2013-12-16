@@ -52,12 +52,14 @@ class Actor(pygame.sprite.Sprite):
         for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
             if movepos[0] > 0 and self.rect.right > obstacle.rect.left:
                 self.rect.right = obstacle.rect.left
+                self.on_collision(obstacle)
                 for moveable in pygame.sprite.spritecollide(self, moveables, 0):
                     if moveable == self:
                         continue
                     Actor.move(moveable, moveables, obstacles, moveable.getmovepos(), True)
             if movepos[0] < 0 and self.rect.left < obstacle.rect.right:
                 self.rect.left = obstacle.rect.right
+                self.on_collision(obstacle)
                 for moveable in pygame.sprite.spritecollide(self, moveables, 0):
                     if moveable == self:
                         continue
@@ -89,12 +91,14 @@ class Actor(pygame.sprite.Sprite):
         for obstacle in pygame.sprite.spritecollide(self, obstacles, 0):
             if movepos[1] > 0 and self.rect.bottom > obstacle.rect.top:
                 self.rect.bottom = obstacle.rect.top
+                self.on_collision(obstacle)
                 for moveable in pygame.sprite.spritecollide(self, moveables, 0):
                     if moveable == self:
                         continue
                     Actor.move(moveable, moveables, obstacles, moveable.getmovepos(), True)
             if movepos[1] < 0 and self.rect.top < obstacle.rect.bottom:
                 self.rect.top = obstacle.rect.bottom
+                self.on_collision(obstacle)
                 for moveable in pygame.sprite.spritecollide(self, moveables, 0):
                     if moveable == self:
                         continue

@@ -9,8 +9,8 @@ import os
 import pygame
 
 def distance(coorda, coordb):
-    w = coorda[0] + coordb[0]
-    h = coorda[1] + coordb[1]
+    w = coorda[0] - coordb[0]
+    h = coorda[1] - coordb[1]
     return math.sqrt(w*w + h*h)
 
 def convert_to_unit_vector(x1, x2, y1, y2):
@@ -29,7 +29,7 @@ def text_format(surface, string, size, position, color = (66,66,66), try_to_end_
     substring_list = []
     while len(string) > try_to_end_line:
         i = try_to_end_line-1
-        while (string[i] != ' '):
+        while (i < len(string) and string[i] != ' ' ):
             i+=1
         substring_list.append(string[:i])
         string = string[i+1:]

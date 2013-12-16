@@ -25,6 +25,7 @@ import pygame
 import main
 import behaviors
 import monsters
+import utils
 from pygame.locals import *
 
 def load_png(name):
@@ -66,6 +67,7 @@ class Character(pygame.sprite.Sprite):
         self.rect = self.rect.move([74,0])
         self.cannot_collide = pygame.sprite.Group()
         self.rune_effects = [False, False, False, False, False, False, False, False]
+        self.buff_effects = [False, False, False, False, False, False, False, False]
     
     def getmovepos(self):
         if self.state == "hit":
@@ -77,13 +79,27 @@ class Character(pygame.sprite.Sprite):
         if self.state == "move" and isinstance(sprite, monsters.Monster):
             self.health -= sprite.strength
             if self.rune_effects[1]:
-                print("taking 50% damage")
-                self.health += sprite.strength/2
+                print("taking 20% damage")
+                self.health += sprite.strength*4/5
         
     def update(self, obstacles, moveables, sword):
         if self.rune_effects[0]:
             self.health = 100
             self.rune_effects[0] = False
+            
+        if self.rune_effects[3]:
+            for moveable in moveables:
+                if moveable != self and utils.distance(self.rect.center, moveable.rect.center) <= 200:
+                    moveable.health -= 60
+                    if moveable.health < 0:
+                        moveable.kill()
+                        if moveable.isBoss:
+                            pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'BossDeath'}))
+                        else:
+                            pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'MonsterDeath'}))
+                        
+            self.rune_effects[3] = False
+                    
         
         self.sword_cooldown += 1
         if self.state == "hit":
@@ -316,8 +332,8 @@ class Sword(pygame.sprite.Sprite):
             monster.state = "pushback"
             monster.health -= self.strength
             if character.rune_effects[2]:
-                monster.health -= self.strength
-                print "Weapon dealt double damage"
+                monster.health -= self.strength*3
+                print "Weapon dealt quadruple damage"
             if monster.health <= 0:
                 monster.kill()
                 if monster.isBoss:

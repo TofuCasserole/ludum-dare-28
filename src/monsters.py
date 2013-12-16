@@ -65,6 +65,10 @@ class Monster(actor.Actor):
                 self.movepos[0] = 0
                 self.movepos[1] = 0
                 self.state = "hit"
+        if isinstance(sprite, model.Obstacle):
+            if self.state == 'jump':
+                self.state = 'wait'
+                self.movepos = [0, 0]
         '''if isinstance(sprite, Monster):
             if (self.state == "hit" and sprite.state != "hit"):
                 sprite.movepos[0] = self.movepos[0]
