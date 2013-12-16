@@ -53,12 +53,18 @@ def main():
             elif event.type == USEREVENT:
                 if event.subtype == "MonsterDeath":
                     l.num_monsters -= 1
+                    print "Monsters Left", l.num_monsters   
                     if l.num_monsters == 0:
-                        for room in l.getAllROoms():
-                            if room.bossdoors.sprites != []:
-                                room.door_sprites.add(model.Door(room.bossdoors.sprites[0].rect.topleft))
-                                room.bossdoors.clear()
+                        print("Level Clear!")
+                        for room in l.getAllRooms():
+                            if room.bossdoors.sprites() != []:
+                                room.door_sprites.add(model.Door(room.bossdoors.sprites()[0].rect.topleft))
+                                room.bossdoors.empty()
             elif event.type == KEYDOWN:
+                if event.key == K_e:
+                    for room in l.getAllRooms():
+                        if room.medbay.sprites() != [] and room.medbay.sprites()[0].can_heal == True:
+                            room.medbay.sprites()[0].is_healing = True
                 if event.key == K_SPACE or event.key == K_RETURN:
                     if sword.sprites() == [] and character.sword_cooldown > 10:
                         sword.add(model.Sword(character))
@@ -99,8 +105,10 @@ def main():
                     character.tryingmoveright = True
                     character.last_direction_moved = "right"
             elif event.type == KEYUP:
-                if True == False:
-                    pass
+                if event.key == K_e:
+                    for room in l.getAllRooms():
+                        if room.medbay.sprites() != []:
+                            room.medbay.sprites()[0].is_healing = False
                 elif event.key == K_a:
                     #if character.movepos[0] < 0:
                     if character.tryingmoveright == False:
@@ -136,6 +144,7 @@ def main():
         character.currentroom.monsters.draw(screen)
         character.currentroom.projectiles.draw(screen)
         character.currentroom.bossdoors.draw(screen)
+        character.currentroom.medbay.draw(screen)
         #for monster in currentroom.monsters.sprites():
         #    screen.blit(monster.image, monster.rect)
         charactersprites.update(character.currentroom.walls, character.currentroom.moveables, sword)
@@ -146,6 +155,7 @@ def main():
         character.currentroom.monsters.update(character.currentroom.walls, character.currentroom.moveables, character)
         #obstacles.draw(screen)
         character.currentroom.door_sprites.update(character, l)
+        character.currentroom.medbay.update(character)
         sword.draw(screen)
         pygame.display.flip()
 

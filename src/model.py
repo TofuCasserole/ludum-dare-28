@@ -323,6 +323,26 @@ class Door(pygame.sprite.Sprite):
                 monster.rect.left = self.rect.right
             elif self.rect.top == 224 and self.rect.left == 608:
                 monster.rect.right = self.rect.left
+
+class MedBay(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = load_png('bossdoor.png')
+        self.image = pygame.transform.scale(self.image, (32, 32))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (576,416)
+        self.can_heal = False
+        self.health = 20
+        
+    def update(self, character):
+        if pygame.sprite.collide_rect(self, character) and self.health > 0:
+            self.can_heal = True
+        else:
+            self.can_heal = False
+            self.is_healing = False
+        if self.is_healing:
+            self.health -= 1
+            character.health += 1
                 
 class BossDoor(pygame.sprite.Sprite):
     def __init__(self, location):
@@ -447,6 +467,7 @@ class Room:
         self.door_sprites = pygame.sprite.RenderUpdates()
         self.projectiles = pygame.sprite.RenderUpdates()
         self.bossdoors = pygame.sprite.RenderUpdates()
+        self.medbay = pygame.sprite.RenderUpdates()
         self.cord=cord
         
     def add_monsters(self, charactersprites, level):
@@ -536,7 +557,12 @@ class Level:
             self.generateWalls()
             self.printGrid()
             self.generateObstacles()
+            self.addmedbay()
             self.num_monsters = 0
+    def addmedbay(self):
+        mylist = [i for i in self.getAllRooms() if i.cord != self.bossRoom]
+        random.shuffle(mylist)
+        mylist.pop().medbay.add(MedBay())
     def generateWalls(self):
         for i in range(self.SIZE):
             for j in range(self.SIZE):

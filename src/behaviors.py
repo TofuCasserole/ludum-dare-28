@@ -128,6 +128,10 @@ def Boss(object, obstacles, moveables, character):
         else:
             object.waitcount = 0
             object.state = random.choice(states)
+            if object.state == "move":
+                object.movepos[0] = random.randint(-1,1)*3
+                object.movepos[1] = random.randint(-1,1)*3
+                
 
     if object.state==wander:
         object.movepos[0] = random.randint(-1,1)*3
