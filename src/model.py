@@ -252,12 +252,11 @@ class Character(actor.Actor):
 #                 self.rect.center = self.area.center
     
 
-class Projectile(pygame.sprite.Sprite):
+class Projectile(actor.Actor):
     def __init__(self, image, strength):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = load_png(image)
-        self.image = pygame.transform.scale(self.image, (16, 16))
-        self.rect = self.image.get_rect()
+        image = load_png(image)
+        image = pygame.transform.scale(image, (16, 16))
+        actor.Actor.__init__(self, image, image.get_rect(), None, False, False)
         self.strength = strength
         self.movepos = [0,0]
         screen = pygame.display.get_surface()
@@ -567,12 +566,11 @@ class Room:
             self.moveables.add(self.monsters)
             return
         for i in range(random.randint(3,5)):
-#             x = random.randint(0,1)
-#             if x == 0:
-#                 temp_monster = Monster(0, behaviors.blue_mnm)
-#             if x == 1:
-#                 temp_monster = Monster(1, behaviors.green_mnm)
-            temp_monster = monsters.Monster(monsters.MNM)
+            x = random.randint(0,1)
+            if x == 0:
+                temp_monster = monsters.Monster(monsters.MNM)
+            if x == 1:
+                temp_monster = monsters.Monster(monsters.MNM_RANGED)
             temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-64), random.randint(0,temp_monster.area.bottom-64))
             while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
                or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):

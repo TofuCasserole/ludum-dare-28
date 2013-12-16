@@ -21,6 +21,7 @@ def blue_mnm(sprite, obstacles, moveables, character):
             sprite.state = "wait"
             for current_collisions in pygame.sprite.spritecollide(sprite, moveables,0):
                 sprite.cannot_collide.add(current_collisions)
+        return
     
     if sprite.state != "hit" and sprite.state != "pushback" and sprite.state != "windup" and sprite.state != "jump":
         if utils.distance(sprite.rect.center, character.rect.center) <= 100:
@@ -86,8 +87,6 @@ def green_mnm(sprite, obstacles, moveables, character):
             sprite.state = "wait2"
             for current_collisions in pygame.sprite.spritecollide(sprite, moveables,0):
                 sprite.cannot_collide.add(current_collisions)
-        model.move(sprite, moveables, obstacles, sprite.movepos)
-        pygame.event.pump()
         return
    
     if sprite.state == "pushback":
@@ -125,15 +124,8 @@ def green_mnm(sprite, obstacles, moveables, character):
             myProjectile.rect.center = sprite.rect.center
             vec = utils.convert_to_unit_vector(sprite.rect.x, character.rect.x, sprite.rect.y, character.rect.y)
             myProjectile.movepos = [int(vec[0] * 12), int(vec[1] * 12)]
-            
+            sprite.state = 'wait2'
             sprite.waitcount = 0
-            sprite.state = "wait2"
-            
-    model.move(sprite, moveables, obstacles, sprite.movepos)
-    for current_collision in sprite.cannot_collide.sprites():
-        if not current_collision in pygame.sprite.spritecollide(sprite, moveables, 0):
-            sprite.cannot_collide.remove(current_collision)
-    pygame.event.pump()
 
 def Boss(sprite, obstacles, moveables, character):
     #states that can be chosen at random, move should not be a part of this
@@ -149,8 +141,6 @@ def Boss(sprite, obstacles, moveables, character):
             sprite.state = "wait"
             for current_collisions in pygame.sprite.spritecollide(sprite, moveables,0):
                 sprite.cannot_collide.add(current_collisions)
-        model.move(sprite, moveables, obstacles, sprite.movepos)
-        pygame.event.pump()
         return
     if sprite.state == "pushback":
         if sprite.pushcount < 2:
@@ -202,9 +192,3 @@ def Boss(sprite, obstacles, moveables, character):
             sprite.movepos = [x_speed, y_speed] 
             sprite.waitcount = 0
             sprite.state = "wait"
-
-    model.move(sprite, moveables, obstacles, sprite.movepos)
-    for current_collision in sprite.cannot_collide.sprites():
-        if not current_collision in pygame.sprite.spritecollide(sprite, moveables, 0):
-            sprite.cannot_collide.remove(current_collision)
-    pygame.event.pump()

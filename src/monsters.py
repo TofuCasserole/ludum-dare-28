@@ -18,6 +18,8 @@ MNM = {
        'health':20, 'strength':2, 'is_boss':False, 'random_state':False,
        'init_state':['wait'], 'size': 32,
        'state_anims':{'wait':([Rect(0,0,32,32)], True, 1),
+                      'hit':([Rect(0,0,32,32)], True, 1),
+                      'pushback':([Rect(0,0,32,32)], True, 1),
                       'move':([Rect(0,0,32,32), Rect(32,0,32,32),
                                Rect(0,0,32,32), Rect(64,0,32,32)],
                               True, 8),
@@ -25,11 +27,27 @@ MNM = {
                       'jump':([Rect(128,0,32,32)], True, 1)}
         }
 
+MNM_RANGED = {
+              'name':'mnm_ranged', 'image':'green_mnm.png', 'behavior':behaviors.green_mnm,
+              'health':20, 'strength':2, 'is_boss':False, 'random_state':True,
+              'init_state':['wait1','wait2','move'], 'size':32,
+              'state_anims':{'wait1':([Rect(0,0,32,32)], True, 1),
+                             'wait2':([Rect(0,0,32,32)], True, 1),
+                             'hit':([Rect(0,0,32,32)], True, 1),
+                             'pushback':([Rect(0,0,32,32)], True, 1),
+                             'move':([Rect(0,0,32,32), Rect(32,0,32,32),
+                                      Rect(0,0,32,32), Rect(64,0,32,32)],
+                                     True, 8),
+                             }
+              }
+
 BOSS = {
         'name':'boss', 'image':'mnm.png', 'behavior':behaviors.Boss,
         'health':50, 'strength':5, 'is_boss':True, 'random_state':False,
         'init_state':['wait'], 'size': 32,
         'state_anims':{'wait':([Rect(0,0,32,32)], True, 1),
+                       'hit':([Rect(0,0,32,32)], True, 1),
+                       'pushback':([Rect(0,0,32,32)], True, 1),
                        'wander':([Rect(0,0,32,32), Rect(32,0,32,32),
                                   Rect(0,0,32,32), Rect(64,0,32,32)],
                                  True, 8),
@@ -38,7 +56,7 @@ BOSS = {
                                          True, 8),
                        'charge':([Rect(0,0,32,32), Rect(32,0,32,32),
                                   Rect(0,0,32,32), Rect(64,0,32,32)],
-                                 True, 2),
+                                 True, 2)
                        }
         }
 
