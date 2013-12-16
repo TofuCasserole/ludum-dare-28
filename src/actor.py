@@ -19,16 +19,14 @@ def create_anim(state_name, arguments, sheet):
 
 class Actor(pygame.sprite.Sprite):
     
-    def __init__(self, image, rectangle, state_anims, directional=True, respawns=False):
+    def __init__(self, image, rectangle, state_anims, animated=True, respawns=False):
         pygame.sprite.Sprite.__init__(self)
         self.respawns = respawns
-        self.isdirectional = directional
-        img = pygame.transform.scale2x(utils.load_png(image))
-        temp_rect = img.get_rect()
-        if directional:
+        self.isdirectional = animated
+        temp_rect = image.get_rect()
+        if animated:
             self.dir = DOWN
-            sheet = spritesheet.SpriteSheet(img)
-            self.default_img = sheet.image_at(rectangle)
+            sheet = spritesheet.SpriteSheet(image)
             upsheet = sheet.subsheet(Rect(0,0,temp_rect.w,rectangle.h))
             downsheet = sheet.subsheet(Rect(0,32,temp_rect.w,rectangle.h))
             leftsheet = sheet.subsheet(Rect(0,96,temp_rect.w,rectangle.h))
@@ -39,9 +37,9 @@ class Actor(pygame.sprite.Sprite):
             self.rightanims = dict(map(lambda (k,v): create_anim(k,v,rightsheet), state_anims.iteritems()))
             self.default_img = sheet.image_at(rectangle)
             self.current_anim = self.downanims.get(self.state).iter()
-            self.image = self.downanims.get(self.state).next()
+            self.image = self.default_img
         else:
-            self.image = img
+            self.image = image
         self.rect = rectangle
         self.movepos = [0,0]
         
@@ -123,33 +121,25 @@ class Actor(pygame.sprite.Sprite):
     
     def update(self, moveables, obstacles):
         if self.isdirectional:
+            anim = self.downanims
             if abs(self.movepos[0]) < abs(self.movepos[1]):
                 if self.movepos[1] < 0:
-                    self.dir = UP
-                elif self.movepos[1] > 0:
-                    self.dir = DOWN
+                    anim = self.upanims
+                elif self.movepos[1] >= 0:
+                    anim = self.downanims
             elif abs(self.movepos[0]) > abs(self.movepos[1]):
                 if self.movepos[0] < 0:
-                    self.dir = LEFT
+                    anim = self.leftanims
                 elif self.movepos[0] > 0:
-                    self.dir = RIGHT
-        anim = self.downanims
-        if self.dir == UP:
-            anim = self.upanims
-        elif self.dir == DOWN:
-            anim = self.downanims
-        elif self.dir == LEFT:
-            anim = self.leftanims
-        elif self.dir == RIGHT:
-            anim = self.rightanims
+                    anim = self.rightanims
         
-        if self.state in anim.keys():
-            if self.prev_state != self.state:
-                self.current_anim = anim.get(self.state).iter()
-                self.prev_state = self.state
-            self.image = self.current_anim.next()
-        else:
-            self.image = self.default_img
+            if self.state in anim.keys():
+                if self.prev_state != self.state:
+                    self.current_anim = anim.get(self.state).iter()
+                    self.prev_state = self.state
+                self.image = self.current_anim.next()
+            else:
+                self.image = self.default_img
         
         self.move(moveables, obstacles, self.getmovepos())
         for current_collision in self.cannot_collide.sprites():

@@ -17,9 +17,8 @@ class SpriteSheet(object):
     def subsheet(self, rectangle):
         return SpriteSheet(self.image_at(rectangle))
     
-    def image_at(self, rectangle):
+    def image_at(self, rect):
         "Loads image from x,y,x+offset,y+offset"
-        rect = pygame.Rect(rectangle)
         image = pygame.Surface(rect.size, flags=SRCALPHA).convert_alpha()
         image.blit(self.sheet, (0, 0), rect)
         return image
