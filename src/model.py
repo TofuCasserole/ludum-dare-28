@@ -24,6 +24,7 @@ import random
 import pygame
 import main
 import behaviors
+import monsters
 from pygame.locals import *
 
 def load_png(name):
@@ -73,7 +74,7 @@ class Character(pygame.sprite.Sprite):
             return self.movepos
         
     def on_collision(self, sprite):
-        if self.state == "move" and isinstance(sprite, Monster):
+        if self.state == "move" and isinstance(sprite, monsters.Monster):
             self.health -= sprite.strength
             if self.rune_effects[1]:
                 print("taking 50% damage")
@@ -114,80 +115,125 @@ class Character(pygame.sprite.Sprite):
         pygame.event.pump()
         
 
-class Monster(pygame.sprite.Sprite):
-    def __init__(self, type, behavior, isBoss=False):
-        self.behavior = behavior
-        pygame.sprite.Sprite.__init__(self)
-        self.image = load_png(MONSTER_IMAGES[type])
-        self.image = pygame.transform.scale2x(self.image)
-        self.rect = self.image.get_rect()
-        screen = pygame.display.get_surface()
-        self.area = screen.get_rect()
-        random.seed()
-        self.state = "chase"
-        self.movepos = [0,0]
-        self.hitcount = 0
-        self.pushcount = 0
-        self.cannot_collide = pygame.sprite.Group()
-        self.isBoss=isBoss
-        self.type = type
-        if type == MnM:
-            self.health = 20
-            self.strength = 2
-            self.movecount = 0
-            self.waitcount = 0
-        if type == MnM_RANGED:
-            self.health = 20
-            self.strength = 2
-            self.waitcount = 0
-            self.movecount = 0
-            x = random.randint(0,2)
-            if x == 0:
-                self.state = "wait2"
-                self.waitcount = random.randint(0,40)
-            if x == 1:
-                self.state = "move"
-                self.movepos[0] = random.randint(-1,1)*3
-                self.movepos[1] = random.randint(-1,1)*3
-                self.movecount = random.randint(0,60)
-            if x == 2:
-                self.state = "wait1"
-                self.waitcount = random.randint(0,40)
-        if type==BOSS:
-            self.health=50
-            self.strength=5
-            self.state='wait' 
-            self.waitcount = 0
-            self.movecount = 0
-    def getmovepos(self):
-        return self.movepos
-    
-    def on_collision(self, sprite):
-        if isinstance(sprite, Character):
-            if (sprite.state == "move"):
-                sprite.hitmove[0] = self.movepos[0]/3*8
-                sprite.hitmove[1] = self.movepos[1]/3*8
-                sprite.state = "hit"
-            if (self.state != "hit"):
-                self.movepos[0] = 0
-                self.movepos[1] = 0
-                self.state = "hit"
-        '''if isinstance(sprite, Monster):
-            if (self.state == "hit" and sprite.state != "hit"):
-                sprite.movepos[0] = self.movepos[0]
-                sprite.movepos[1] = self.movepos[1]
-                sprite.state = "hit"
-                sprite.hitcount = self.hitcount''' 
-    
-    def update(self, obstacles, moveables, character):
-        self.behavior(self, obstacles, moveables, character)
-        if (self.rect.bottom < 32 or self.rect.top > 448 or
-            self.rect.right < 64 or self.rect.bottom > self.rect.left > 608):
-            if not self.type in boss_types:
-                self.kill()
-                pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'MonsterDeath'}))
-            else:
-                self.rect.center = self.area.center
+#class Monster(pygame.sprite.Sprite):
+#    def __init__(self, type, behavior, isBoss=False):
+#        self.behavior = behavior
+#        pygame.sprite.Sprite.__init__(self)
+#        self.image = load_png(MONSTER_IMAGES[type])
+#        self.image = pygame.transform.scale2x(self.image)
+#        self.rect = self.image.get_rect()
+#        screen = pygame.display.get_surface()
+#        self.area = screen.get_rect()
+#        random.seed()
+#        self.state = "chase"
+#        self.movepos = [0,0]
+#        self.hitcount = 0
+#        self.pushcount = 0
+#        self.cannot_collide = pygame.sprite.Group()
+#        self.isBoss=isBoss
+#        self.type = type
+#        if type == MnM:
+#            self.health = 20
+#            self.strength = 2
+#            self.movecount = 0
+#            self.waitcount = 0
+#        if type == MnM_RANGED:
+#            self.health = 20
+#            self.strength = 2
+#            self.waitcount = 0
+#            self.movecount = 0
+#            x = random.randint(0,2)
+#            if x == 0:
+#                self.state = "wait2"
+#                self.waitcount = random.randint(0,40)
+#            if x == 1:
+#                self.state = "move"
+#                self.movepos[0] = random.randint(-1,1)*3
+#                self.movepos[1] = random.randint(-1,1)*3
+#                self.movecount = random.randint(0,60)
+#            if x == 2:
+#                self.state = "wait1"
+#                self.waitcount = random.randint(0,40)
+#        if type==BOSS:
+#            self.health=50
+#            self.strength=5
+#            self.state='wait' 
+#            self.waitcount = 0
+#            self.movecount = 0
+#   def getmovepos(self):
+#        return self.movepos
+# class Monster(pygame.sprite.Sprite):
+#     def __init__(self, type, behavior, isBoss=False):
+#         self.behavior = behavior
+#         pygame.sprite.Sprite.__init__(self)
+#         self.image = load_png(MONSTER_IMAGES[type])
+#         self.image = pygame.transform.scale2x(self.image)
+#         self.rect = self.image.get_rect()
+#         screen = pygame.display.get_surface()
+#         self.area = screen.get_rect()
+#         random.seed()
+#         self.state = "chase"
+#         self.movepos = [0,0]
+#         self.hitcount = 0
+#         self.pushcount = 0
+#         self.cannot_collide = pygame.sprite.Group()
+#         self.isBoss=isBoss
+#         self.type = type
+#         if type == MnM:
+#             self.health = 20
+#             self.strength = 2
+#         if type == MnM_RANGED:
+#             self.health = 20
+#             self.strength = 2
+#             self.waitcount = 0
+#             self.movecount = 0
+#             x = random.randint(0,2)
+#             if x == 0:
+#                 self.state = "wait2"
+#                 self.waitcount = random.randint(0,40)
+#             if x == 1:
+#                 self.state = "move"
+#                 self.movepos[0] = random.randint(-1,1)*3
+#                 self.movepos[1] = random.randint(-1,1)*3
+#                 self.movecount = random.randint(0,60)
+#             if x == 2:
+#                 self.state = "wait1"
+#                 self.waitcount = random.randint(0,40)
+#         if type==BOSS:
+#             self.health=50
+#             self.strength=5
+#             self.state='wait' 
+#             self.waitcount = 0
+#             self.movecount = 0
+#     def getmovepos(self):
+#         return self.movepos
+#     
+#     def on_collision(self, sprite):
+#         if isinstance(sprite, Character):
+#             if (sprite.state == "move"):
+#                 sprite.hitmove[0] = self.movepos[0]/3*8
+#                 sprite.hitmove[1] = self.movepos[1]/3*8
+#                 sprite.state = "hit"
+#             if (self.state != "hit"):
+#                 self.movepos[0] = 0
+#                 self.movepos[1] = 0
+#                 self.state = "hit"
+#         '''if isinstance(sprite, Monster):
+#             if (self.state == "hit" and sprite.state != "hit"):
+#                 sprite.movepos[0] = self.movepos[0]
+#                 sprite.movepos[1] = self.movepos[1]
+#                 sprite.state = "hit"
+#                 sprite.hitcount = self.hitcount''' 
+#     
+#     def update(self, obstacles, moveables, character):
+#         self.behavior(self, obstacles, moveables, character)
+#         if (self.rect.bottom < 32 or self.rect.top > 448 or
+#             self.rect.right < 64 or self.rect.bottom > self.rect.left > 608):
+#             if not self.type in boss_types:
+#                 self.kill()
+#                 pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'MonsterDeath'}))
+#             else:
+#                 self.rect.center = self.area.center
     
 
 class Projectile(pygame.sprite.Sprite):
@@ -495,21 +541,22 @@ class Room:
         self.cord=cord
         
     def add_monsters(self, charactersprites, level):
-        if level.bossRoom==self.cord:
-            temp_monster = Monster(2, behaviors.Boss, True)
-            temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-32), random.randint(0,temp_monster.area.bottom-32))
-            while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
-               or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
-                    temp_monster.rect.topleft = (random.randint(0,temp_monster.area.right), random.randint(0,temp_monster.area.bottom))
-            self.monsters.add(temp_monster)
-            self.moveables.add(self.monsters)
-            return
+#         if level.bossRoom==self.cord:
+#             temp_monster = Monster(2, behaviors.Boss, True)
+#             temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-32), random.randint(0,temp_monster.area.bottom-32))
+#             while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
+#                or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
+#                     temp_monster.rect.topleft = (random.randint(0,temp_monster.area.right), random.randint(0,temp_monster.area.bottom))
+#             self.monsters.add(temp_monster)
+#             self.moveables.add(self.monsters)
+#             return
         for i in range(random.randint(3,5)):
-            x = random.randint(0,1)
-            if x == 0:
-                temp_monster = Monster(0, behaviors.blue_mnm)
-            if x == 1:
-                temp_monster = Monster(1, behaviors.green_mnm)
+#             x = random.randint(0,1)
+#             if x == 0:
+#                 temp_monster = Monster(0, behaviors.blue_mnm)
+#             if x == 1:
+#                 temp_monster = Monster(1, behaviors.green_mnm)
+            temp_monster = monsters.Monster(monsters.MNM)
             temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-64), random.randint(0,temp_monster.area.bottom-64))
             while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
                or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):

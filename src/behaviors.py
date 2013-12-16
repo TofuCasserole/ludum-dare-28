@@ -21,13 +21,13 @@ def blue_mnm(object, obstacles, moveables, character):
             object.state = "wait"
             for current_collisions in pygame.sprite.spritecollide(object, moveables,0):
                 object.cannot_collide.add(current_collisions)
-        model.move(object, moveables, obstacles, object.movepos)
-        pygame.event.pump()
-        return
     
-    if object.state != "hit" and object.state != "pushback" and object.state != "windup":
-        if utils.distance(object.rect.topleft, character.rect.topleft) <= 96:
+    if object.state != "hit" and object.state != "pushback" and object.state != "windup" and object.state != "jump":
+        if utils.distance(object.rect.topleft, character.rect.topleft) <= 1000:
             object.target = character.rect.topleft
+            object.waitcount = 0
+            object.movecount = 0
+            object.movepos = [0,0]
             object.state = "windup"
     
     if object.state == "windup":
@@ -69,17 +69,6 @@ def blue_mnm(object, obstacles, moveables, character):
             object.movecount = 0
             object.movepos = [0,0]
             object.state = "wait"
-    
-    if abs(object.movepos[0]) < abs(object.movepos[1]):
-        if object.movepos[1] < 0:
-            object.dir = model.NORTH
-        elif object.movepos[1] > 0:
-            object.dir = model.SOUTH
-    elif abs(object.movepos[0]) > abs(object.movepos[1]):
-        if object.movepos[0] < 0:
-            object.dir = model.WEST
-        elif object.movepos[0] > 0:
-            object.dir = model.EAST
 
 def green_mnm(object, obstacles, moveables, character):
     if object.state == "hit":
