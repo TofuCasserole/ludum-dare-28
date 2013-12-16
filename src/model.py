@@ -10,6 +10,11 @@ SILENCE = 3
 
 MONSTER_IMAGES = ['mnm.png', 'green_mnm.png']
 
+UP = 0
+DOWN = 32
+LEFT = 64
+RIGHT = 96
+
 EAST = "east"
 WEST = "west"
 NORTH = "north"
@@ -23,6 +28,7 @@ import random
 import pygame
 import main
 import behaviors
+import spritesheet
 from pygame.locals import *
 
 #WOOOOOOO!!!!
@@ -108,10 +114,12 @@ class Character(pygame.sprite.Sprite):
         
 
 class Monster(pygame.sprite.Sprite):
+    
     def __init__(self, type, behavior):
-        self.behavior = behavior
         pygame.sprite.Sprite.__init__(self)
-        self.image = load_png(MONSTER_IMAGES[type])
+        self.dir = SOUTH
+        self.behavior = behavior
+        self.image = spritesheet.SpriteSheet(load_png(MONSTER_IMAGES[type]))
         self.image = pygame.transform.scale2x(self.image)
         self.rect = self.image.get_rect()
         screen = pygame.display.get_surface()
