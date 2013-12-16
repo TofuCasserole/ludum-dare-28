@@ -11,14 +11,11 @@ import pygame
 from pygame import Rect
 from pygame.locals import *
 import random
-import utils
 
 MNM = {'name':'mnm', 'image':'mnm.png', 'behavior':behaviors.blue_mnm,
        'health':20, 'strength':2, 'is_boss':False, 'random_state':False,
-       'init_state':['wait'], 'rect':Rect(0,32,32,32),
-       'state_anims':{'hit':([Rect(0,0,32,32)], True, 1),
-                      'pushback':([Rect(0,0,32,32)], True, 1),
-                      'wait':([Rect(0,0,32,32)], True, 1),
+       'init_state':['wait'], 'size': 32,
+       'state_anims':{'wait':([Rect(0,0,32,32)], True, 1),
                       'move':([Rect(0,0,32,32), Rect(32,0,32,32),
                                Rect(0,0,32,32), Rect(64,0,32,32)],
                               True, 8),
@@ -34,8 +31,9 @@ class Monster(actor.Actor):
         else:
             self.state = mon_type['init_state'][0]
         self.prev_state = self.state
-        image = pygame.transform.scale2x(utils.load_png(mon_type['image']))
-        actor.Actor.__init__(self, image, mon_type['rect'], mon_type['state_anims'],
+        actor.Actor.__init__(self, mon_type['image'],
+                             Rect(0,0,mon_type['size'],mon_type['size']),
+                             mon_type['state_anims'],
                              respawns = mon_type['is_boss'])
         self.name = mon_type['name']
         self.behavior = mon_type['behavior']

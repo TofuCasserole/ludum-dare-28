@@ -19,7 +19,6 @@ SOUTH = "south"
 LENGTH = 9
 WIDTH = 13
 
-import actor
 import os
 import random
 import pygame
@@ -42,11 +41,12 @@ def load_png(name):
             raise SystemExit, message
     return image
 
-class Character(actor.Actor):
+class Character(pygame.sprite.Sprite):
     def __init__(self):
-        image = load_png('char.png')
-        image = pygame.transform.scale(image, (26, 26))
-        actor.Actor.__init__(self, image, Rect(0,0,26,26), None, False, True)
+        pygame.sprite.Sprite.__init__(self)
+        self.image = load_png('char.png')
+        self.image = pygame.transform.scale(self.image, (26, 26))
+        self.rect = self.image.get_rect()
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         self.health = 100
@@ -105,9 +105,14 @@ class Character(actor.Actor):
                 self.invuln_count = 0
                 self.state = "move"
         
-        if sword.sprites() != []:
-            self.movepos = [0,0]
-        actor.Actor.update(self, moveables, obstacles)
+        if sword.sprites() == []:
+            move(self, moveables, obstacles, self.getmovepos())
+        for current_collision in self.cannot_collide.sprites():
+            if not current_collision in pygame.sprite.spritecollide(self, moveables, 0):
+                self.cannot_collide.remove(current_collision)
+        if self.rect.right < 32 or self.rect.left > 608 or self.rect.bottom < 32 or self.rect.top > 448:
+            self.rect.center = self.area.center
+        pygame.event.pump()
         
 
 #class Monster(pygame.sprite.Sprite):
@@ -552,11 +557,10 @@ class Room:
 #             if x == 1:
 #                 temp_monster = Monster(1, behaviors.green_mnm)
             temp_monster = monsters.Monster(monsters.MNM)
-            random.seed()
             temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-64), random.randint(0,temp_monster.area.bottom-64))
-            while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != []
-                   or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []):
-                    temp_monster.rect.topleft = (random.randint(64,temp_monster.area.right-32), random.randint(32,temp_monster.area.bottom-32))
+            while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
+               or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
+                    temp_monster.rect.topleft = (random.randint(0,temp_monster.area.right), random.randint(0,temp_monster.area.bottom))
             self.monsters.add(temp_monster)
         level.num_monsters += len(self.monsters.sprites())
         self.moveables.add(self.monsters)
