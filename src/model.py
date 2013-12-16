@@ -5,10 +5,9 @@ Created on Dec 13, 2013
 '''
 MnM = 0
 MnM_RANGED = 1
-WEEPINGANGELS = 2
-SILENCE = 3
+BOSS=2
 
-MONSTER_IMAGES = ['mnm.png', 'green_mnm.png']
+MONSTER_IMAGES = ['mnm.png', 'green_mnm.png','mnm.png']
 
 EAST = "east"
 WEST = "west"
@@ -24,8 +23,6 @@ import pygame
 import main
 import behaviors
 from pygame.locals import *
-
-#WOOOOOOO!!!!
 
 def load_png(name):
     """ Load image and return image object"""
@@ -142,8 +139,12 @@ class Monster(pygame.sprite.Sprite):
             if x == 2:
                 self.state = "wait1"
                 self.waitcount = random.randint(0,40)
-            
-     
+        if type==BOSS:
+            self.health=50
+            self.strength=5
+            self.state='wait' 
+            self.waitcount = 0
+            self.movecount = 0
     def getmovepos(self):
         return self.movepos
     
@@ -405,6 +406,13 @@ class Room:
         
     def add_monsters(self, charactersprites, level):
         if level.bossRoom==self.cord:
+            temp_monster = Monster(2, behaviors.Boss)
+            temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-32), random.randint(0,temp_monster.area.bottom-32))
+            while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
+               or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
+                    temp_monster.rect.topleft = (random.randint(0,temp_monster.area.right), random.randint(0,temp_monster.area.bottom))
+            self.monsters.add(temp_monster)
+            self.moveables.add(self.monsters)
             return
         for i in range(random.randint(3,5)):
             x = random.randint(0,1)
