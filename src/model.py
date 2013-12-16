@@ -557,15 +557,15 @@ class Room:
         self.cord=cord
         
     def add_monsters(self, charactersprites, level):
-#         if level.bossRoom==self.cord:
-#             temp_monster = Monster(2, behaviors.Boss, True)
-#             temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-32), random.randint(0,temp_monster.area.bottom-32))
-#             while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
-#                or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
-#                     temp_monster.rect.topleft = (random.randint(0,temp_monster.area.right), random.randint(0,temp_monster.area.bottom))
-#             self.monsters.add(temp_monster)
-#             self.moveables.add(self.monsters)
-#             return
+        if level.bossRoom==self.cord:
+            temp_monster = monsters.Monster(monsters.BOSS)
+            temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-32), random.randint(0,temp_monster.area.bottom-32))
+            while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
+               or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
+                    temp_monster.rect.topleft = (random.randint(0,temp_monster.area.right), random.randint(0,temp_monster.area.bottom))
+            self.monsters.add(temp_monster)
+            self.moveables.add(self.monsters)
+            return
         for i in range(random.randint(3,5)):
 #             x = random.randint(0,1)
 #             if x == 0:

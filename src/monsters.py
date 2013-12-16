@@ -27,9 +27,19 @@ MNM = {
 
 BOSS = {
         'name':'boss', 'image':'mnm.png', 'behavior':behaviors.Boss,
-        'health':50, 'strenght':5, 'is_boss':True, 'random_state':False,
+        'health':50, 'strength':5, 'is_boss':True, 'random_state':False,
         'init_state':['wait'], 'size': 32,
-        'state_anims':{}
+        'state_anims':{'wait':([Rect(0,0,32,32)], True, 1),
+                       'wander':([Rect(0,0,32,32), Rect(32,0,32,32),
+                                  Rect(0,0,32,32), Rect(64,0,32,32)],
+                                 True, 8),
+                       'walk_to_center':([Rect(0,0,32,32), Rect(32,0,32,32),
+                                          Rect(0,0,32,32), Rect(64,0,32,32)],
+                                         True, 8),
+                       'charge':([Rect(0,0,32,32), Rect(32,0,32,32),
+                                  Rect(0,0,32,32), Rect(64,0,32,32)],
+                                 True, 2),
+                       }
         }
 
 class Monster(actor.Actor):
