@@ -121,6 +121,27 @@ def green_mnm(object, obstacles, moveables, character):
 def Boss(object, obstacles, moveables, character):
     #states that can be chosen at random, move should not be a part of this
     states=['wait', 'charge', 'wander','walk_to_center']
+    if object.state == "hit":
+        if object.hitcount < 15:
+            object.hitcount += 1
+        else:
+            object.hitcount = 0
+            object.pushcount = 0
+            object.waitcount = 0
+            object.movecount = 0
+            object.state = "wait"
+            for current_collisions in pygame.sprite.spritecollide(object, moveables,0):
+                object.cannot_collide.add(current_collisions)
+        model.move(object, moveables, obstacles, object.movepos)
+        pygame.event.pump()
+        return
+    if object.state == "pushback":
+        if object.pushcount < 2:
+            object.pushcount += 1
+        else:
+            object.pushcount = 0
+            object.movepos = [0,0]
+            object.state = "wait"
     #wait state 
     if object.state == "wait":
         if object.waitcount < 40:
@@ -128,23 +149,45 @@ def Boss(object, obstacles, moveables, character):
         else:
             object.waitcount = 0
             object.state = random.choice(states)
-            if object.state == "move":
+            if object.state=='wander':                
                 object.movepos[0] = random.randint(-1,1)*3
                 object.movepos[1] = random.randint(-1,1)*3
-                
+                object.state='wait'
 
-    if object.state==wander:
-        object.movepos[0] = random.randint(-1,1)*3
-        object.movepos[1] = random.randint(-1,1)*3
-        object.state = "move"
-
-    if object.state == "move":
-        if object.movecount < 60:
-            object.movecount += 1
-        else:
-            object.movecount = 0
-            object.movepos = [0,0]
-            object.state = "wait"
-    
+    #640x480 offset by 32
     if object.state=='walk_to_center':
-        pass
+        if object.waitcount < 40:
+            object.waitcount += 1
+        else:
+            x_distance = abs(object.rect.x - ((640/2)+32))
+            y_distance = abs(object.rect.y - (480/2))
+            x_speed = 12*x_distance/(x_distance+y_distance)
+            y_speed = 12*y_distance/(x_distance+y_distance)
+            if object.rect.x > ((640/2)+32):
+                x_speed *= -1
+            if object.rect.y > (480/2):
+                y_speed *= -1
+            object.movepos = [x_speed, y_speed]
+            object.waitcount=0
+            object.state='wait'
+    if object.state=='charge':
+        if object.waitcount < 40:
+            object.waitcount+=1
+        else:
+            x_distance = abs(object.rect.x - character.rect.x)
+            y_distance = abs(object.rect.y - character.rect.y)
+            x_speed = 20*x_distance/(x_distance+y_distance)
+            y_speed = 20*y_distance/(x_distance+y_distance)
+            if object.rect.x > character.rect.x:
+                x_speed *= -1
+            if object.rect.y > character.rect.y:
+                y_speed *= -1
+            object.movepos = [x_speed, y_speed] 
+            object.waitcount = 0
+            object.state = "wait"
+
+    model.move(object, moveables, obstacles, object.movepos)
+    for current_collision in object.cannot_collide.sprites():
+        if not current_collision in pygame.sprite.spritecollide(object, moveables, 0):
+            object.cannot_collide.remove(current_collision)
+    pygame.event.pump()
