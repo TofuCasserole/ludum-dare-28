@@ -486,18 +486,17 @@ class Room:
             self.moveables.add(self.monsters)
             return
         for i in range(random.randint(3,5)):
-            level.num_monsters += 1
             x = random.randint(0,1)
             if x == 0:
                 temp_monster = Monster(0, behaviors.blue_mnm)
             if x == 1:
                 temp_monster = Monster(1, behaviors.green_mnm)
-            temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-32), random.randint(0,temp_monster.area.bottom-32))
+            temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-64), random.randint(0,temp_monster.area.bottom-64))
             while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
                or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
                     temp_monster.rect.topleft = (random.randint(0,temp_monster.area.right), random.randint(0,temp_monster.area.bottom))
             self.monsters.add(temp_monster)
-        level.num_monsters += i
+        level.num_monsters += len(self.monsters.sprites())
         self.moveables.add(self.monsters)
         
   
