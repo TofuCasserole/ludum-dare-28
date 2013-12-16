@@ -48,7 +48,7 @@ class Character(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
-        self.health = 100
+        self.health = 1
         #self.room = start_room
         self.movepos = [0,0]
         self.tryingmoveright = False
@@ -175,6 +175,7 @@ class Monster(pygame.sprite.Sprite):
             self.rect.right < 64 or self.rect.bottom > self.rect.left > 608):
             if not self.type in boss_types:
                 self.kill()
+                pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'MonsterDeath'}))
             else:
                 self.rect.center = self.area.center
     
