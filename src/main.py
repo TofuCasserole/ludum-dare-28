@@ -61,6 +61,18 @@ def main():
                                 room.door_sprites.add(model.Door(room.bossdoors.sprites()[0].rect.topleft))
                                 room.bossdoors.empty()
                 if event.subtype=='BossDeath':
+                    print 'boss death'
+                    #clear out the boss door so that the player can roam around the level
+                    l.getLocation(l.bossRoom).bossdoors.empty()
+                    #l.getLocation(l.bossRoom).bossdoors=pygame.sprite.RenderPlain()
+                    el=model.Elevator()
+                    #l.getLocation(l.bossRoom).obstacles.add(el)
+                    #l.getLocation(l.bossRoom).walls.add(el)
+                    #print character.currentroom.moveables
+                    #l.getLocation(l.bossRoom).bossdoors.add(el)
+                    l.getLocation(l.bossRoom).levelExit.add(el)
+                    #obstacles.add(el)
+                if event.subtype=='ChangeLevel':
                     #now we have to start a new level!
                     levelNumber+=1
                     l=model.Level(levelNumber)
@@ -154,6 +166,7 @@ def main():
         character.currentroom.projectiles.draw(screen)
         character.currentroom.bossdoors.draw(screen)
         character.currentroom.medbay.draw(screen)
+        character.currentroom.levelExit.draw(screen)
         #for monster in currentroom.monsters.sprites():
         #    screen.blit(monster.image, monster.rect)
         charactersprites.update(character.currentroom.walls, character.currentroom.moveables, sword)
@@ -165,6 +178,7 @@ def main():
         #obstacles.draw(screen)
         character.currentroom.door_sprites.update(character, l)
         character.currentroom.medbay.update(character)
+        character.currentroom.levelExit.update(character)
         sword.draw(screen)
         pygame.display.flip()
 

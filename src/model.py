@@ -299,26 +299,36 @@ class Door(pygame.sprite.Sprite):
         
     def update(self, character, l):
         if pygame.sprite.collide_mask(self, character):
+            roomChange=False
             if self.rect.left == 320 and self.rect.top == 0:
                 character.rect.y = 416
                 character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['north'])
                 character.currentroom.moveables.add(character)
+                roomChange=True
             elif self.rect.left == 320 and self.rect.top == 448:
                 character.rect.y = 32                
                 character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['south'])
                 character.currentroom.moveables.add(character)
+                roomChange=True
             elif self.rect.top == 224 and self.rect.left == 32:
                 character.rect.x = 576
                 character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['west'])
                 character.currentroom.moveables.add(character)
+                roomChange=True
             elif self.rect.top == 224 and self.rect.left == 608:
                 character.rect.x = 64
                 character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['east'])
                 character.currentroom.moveables.add(character)
+                roomChange=True
+            if roomChange:
+                if character.currentroom==l.getLocation(l.bossRoom) and len(l.getLocation(l.bossRoom).monsters)>0:#we have entered the boss room, time to lock the player in
+                    doors=l.getLocation(l.bossRoom).door_sprites
+                    for door in doors:
+                        l.getLocation(l.bossRoom).bossdoors.add(BossDoor(door.rect.topleft))
         for monster in pygame.sprite.spritecollide(self, character.currentroom.monsters, 0):
             if self.rect.left == 320 and self.rect.top == 0:
                 monster.rect.top = self.rect.bottom
@@ -329,6 +339,18 @@ class Door(pygame.sprite.Sprite):
             elif self.rect.top == 224 and self.rect.left == 608:
                 monster.rect.right = self.rect.left
 
+class Elevator(pygame.sprite.Sprite):
+    def __init__(self): 
+        pygame.sprite.Sprite.__init__(self)
+        self.image=load_png('bossdoor.png') 
+        self.image = pygame.transform.scale(self.image, (32, 32))
+        self.rect = self.image.get_rect()
+        self.rect.topleft=(200,200)
+        #self.rect.topleft = ((640/2)+32,480)
+    def update(self, character):
+        if pygame.sprite.collide_rect(self, character):
+            pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'ChangeLevel'}))
+
 class MedBay(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -337,8 +359,7 @@ class MedBay(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = (576,416)
         self.can_heal = False
-        self.health = 25
-        
+        self.health = 25 
     def update(self, character):
         if pygame.sprite.collide_rect(self, character) and self.health > 0 and character.health < 100:
             self.can_heal = True
@@ -474,6 +495,7 @@ class Room:
         self.bossdoors = pygame.sprite.RenderUpdates()
         self.medbay = pygame.sprite.RenderUpdates()
         self.cord=cord
+        self.levelExit=pygame.sprite.RenderUpdates()
         
     def add_monsters(self, charactersprites, level):
         if level.bossRoom==self.cord:
@@ -559,7 +581,7 @@ class Level:
             self.SIZE=10
             self.levelGrid=[[-1]*self.SIZE for x in range(self.SIZE)]
             self.levelNumber=levelNumber
-            self.numberOfRooms=random.randint(10,15)
+            self.numberOfRooms=random.randint(2,2)
             self.rootRoom=(self.SIZE/2,self.SIZE/2)
             self.generateLevel()
             self.bossRoom=self.findLongestPath(self.rootRoom)
