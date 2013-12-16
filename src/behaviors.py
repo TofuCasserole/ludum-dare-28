@@ -80,10 +80,7 @@ def blue_mnm(object, obstacles, moveables, character):
             object.dir = model.WEST
         elif object.movepos[0] > 0:
             object.dir = model.EAST
-    
-    if object.state == "wait" or object.state == "move":
         
-    
     model.move(object, moveables, obstacles, object.movepos)
     for current_collision in object.cannot_collide.sprites():
         if not current_collision in pygame.sprite.spritecollide(object, moveables, 0):

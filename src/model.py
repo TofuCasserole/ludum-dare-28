@@ -118,7 +118,7 @@ class Monster(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.dir = SOUTH
         self.behavior = behavior
-        self.image = spritesheet.SpriteSheet(load_png(MONSTER_IMAGES[type]))
+        self.image = load_png(MONSTER_IMAGES[type])
         self.image = pygame.transform.scale2x(self.image)
         self.rect = self.image.get_rect()
         screen = pygame.display.get_surface()
@@ -140,7 +140,7 @@ class Monster(pygame.sprite.Sprite):
             self.movecount = random.randint(0,60)
             self.waitcount = random.randint(0,40)
         self.isBoss=isBoss
-		self.type = type
+        self.type = type
         if type == MnM:
             self.state = "wait"
         elif type == MnM_RANGED:
