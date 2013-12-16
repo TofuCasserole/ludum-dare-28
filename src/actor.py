@@ -14,8 +14,8 @@ DOWN = 'down'
 LEFT = 'left'
 RIGHT = 'right'
 
-def create_anim(state_name, rectangle):
-    pass
+def create_anim(state_name, rectangles, sheet):
+    return (state_name, spritesheet.SpriteStripAnim(sheet, rectangles))
 
 class Actor(pygame.sprite.Sprite):
     
@@ -29,7 +29,7 @@ class Actor(pygame.sprite.Sprite):
             downsheet = sheet.subsheet(Rect(0,32,img.rect.w,rectangle.h))
             leftsheet = sheet.subsheet(Rect(0,64,img.rect.w,rectangle.h))
             rightsheet = sheet.subsheet(Rect(0,96,img.rect.w,rectangle.h))
-            upanims = dict(map())
+            upanims = dict(map(lambda (k,v):))
             self.rect = rectangle
         else:
             self.image = img
