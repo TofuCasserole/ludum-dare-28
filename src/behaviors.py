@@ -9,198 +9,202 @@ import model
 import random
 import utils
 
-def blue_mnm(object, obstacles, moveables, character):
-    if object.state == "hit":
-        if object.hitcount < 15:
-            object.hitcount += 1
+def blue_mnm(sprite, obstacles, moveables, character):
+    if sprite.state == "hit":
+        if sprite.hitcount < 15:
+            sprite.hitcount += 1
         else:
-            object.hitcount = 0
-            object.pushcount = 0
-            object.waitcount = 0
-            object.movecount = 0
-            object.state = "wait"
-            for current_collisions in pygame.sprite.spritecollide(object, moveables,0):
-                object.cannot_collide.add(current_collisions)
+            sprite.hitcount = 0
+            sprite.pushcount = 0
+            sprite.waitcount = 0
+            sprite.movecount = 0
+            sprite.state = "wait"
+            for current_collisions in pygame.sprite.spritecollide(sprite, moveables,0):
+                sprite.cannot_collide.add(current_collisions)
     
-    if object.state != "hit" and object.state != "pushback" and object.state != "windup" and object.state != "jump":
-        if utils.distance(object.rect.topleft, character.rect.topleft) <= 1000:
-            object.target = character.rect.topleft
-            object.waitcount = 0
-            object.movecount = 0
-            object.movepos = [0,0]
-            object.state = "windup"
+    if sprite.state != "hit" and sprite.state != "pushback" and sprite.state != "windup" and sprite.state != "jump":
+        if utils.distance(sprite.rect.center, character.rect.center) <= 100:
+            sprite.target = character.rect.center
+            sprite.waitcount = 0
+            sprite.movecount = 0
+            sprite.movepos = [0,0]
+            sprite.state = "windup"
     
-    if object.state == "windup":
-        if object.waitcount < 20:
-            object.waitcount += 1
+    if sprite.state == "windup":
+        if sprite.waitcount < 20:
+            sprite.waitcount += 1
         else:
-            object.waitcount = 0
-            vec = utils.convert_to_unit_vector(object.rect.x, character.rect.x, object.rect.y, character.rect.y)
-            object.movepos = [vec[0] * 10, vec[1] * 10]
-            object.state = "jump"
+            sprite.waitcount = 0
+            vec = utils.convert_to_unit_vector(sprite.rect.x, character.rect.x, sprite.rect.y, character.rect.y)
+            sprite.movepos = [vec[0] * 10, vec[1] * 10]
+            sprite.state = "jump"
     
-    if object.state == "jump":
-        if object.rect.topleft == object.target:
-            object.movepos = [0,0]
-            object.state = "wait"
+    if sprite.state == "jump":
+        if ((sprite.movepos[0] >= 0 and sprite.movepos[1] >= 0 and sprite.rect.x >= sprite.target[0] and sprite.rect.y >= sprite.target[1]) or
+            (sprite.movepos[0] >= 0 and sprite.movepos[1] <= 0 and sprite.rect.x >= sprite.target[0] and sprite.rect.y <= sprite.target[1]) or
+            (sprite.movepos[0] <= 0 and sprite.movepos[1] <= 0 and sprite.rect.x <= sprite.target[0] and sprite.rect.y >= sprite.target[1]) or
+            (sprite.movepos[0] <= 0 and sprite.movepos[1] <= 0 and sprite.rect.x <= sprite.target[0] and sprite.rect.y <= sprite.target[1]) or
+            pygame.sprite.spritecollide(sprite, obstacles, 0) != []):
+            sprite.movepos = [0,0]
+            sprite.state = "wait"
     
-    if object.state == "pushback":
-        if object.pushcount < 2:
-            object.pushcount += 1
+    if sprite.state == "pushback":
+        if sprite.pushcount < 2:
+            sprite.pushcount += 1
         else:
-            object.pushcount = 0
-            object.movepos = [0,0]
-            object.state = "wait"
+            sprite.pushcount = 0
+            sprite.movepos = [0,0]
+            sprite.state = "wait"
             
-    if object.state == "wait":
-        if object.waitcount < 40:
-            object.waitcount += 1
+    if sprite.state == "wait":
+        if sprite.waitcount < 40:
+            sprite.waitcount += 1
         else:
             random.seed()
-            object.waitcount = 0
-            object.movepos[0] = random.randint(-1,1)*3
-            object.movepos[1] = random.randint(-1,1)*3
-            object.state = "move"
+            sprite.waitcount = 0
+            sprite.movepos[0] = random.randint(-1,1)*3
+            sprite.movepos[1] = random.randint(-1,1)*3
+            sprite.state = "move"
             
-    if object.state == "move":
-        if object.movecount < 60:
-            object.movecount += 1
+    if sprite.state == "move":
+        if sprite.movecount < 60:
+            sprite.movecount += 1
         else:
-            object.movecount = 0
-            object.movepos = [0,0]
-            object.state = "wait"
+            sprite.movecount = 0
+            sprite.movepos = [0,0]
+            sprite.state = "wait"
 
-def green_mnm(object, obstacles, moveables, character):
-    if object.state == "hit":
-        if object.hitcount < 15:
-            object.hitcount += 1
+def green_mnm(sprite, obstacles, moveables, character):
+    if sprite.state == "hit":
+        if sprite.hitcount < 15:
+            sprite.hitcount += 1
         else:
-            object.hitcount = 0
-            object.pushcount = 0
-            object.waitcount = 0
-            object.movecount = 0
-            object.state = "wait2"
-            for current_collisions in pygame.sprite.spritecollide(object, moveables,0):
-                object.cannot_collide.add(current_collisions)
-        model.move(object, moveables, obstacles, object.movepos)
+            sprite.hitcount = 0
+            sprite.pushcount = 0
+            sprite.waitcount = 0
+            sprite.movecount = 0
+            sprite.state = "wait2"
+            for current_collisions in pygame.sprite.spritecollide(sprite, moveables,0):
+                sprite.cannot_collide.add(current_collisions)
+        model.move(sprite, moveables, obstacles, sprite.movepos)
         pygame.event.pump()
         return
    
-    if object.state == "pushback":
-        if object.pushcount < 2:
-            object.pushcount += 1
+    if sprite.state == "pushback":
+        if sprite.pushcount < 2:
+            sprite.pushcount += 1
         else:
-            object.pushcount = 0
-            object.movepos = [0,0]
-            object.state = "wait2"
+            sprite.pushcount = 0
+            sprite.movepos = [0,0]
+            sprite.state = "wait2"
             
-    if object.state == "wait2":
-        if object.waitcount < 40:
-            object.waitcount += 1
+    if sprite.state == "wait2":
+        if sprite.waitcount < 40:
+            sprite.waitcount += 1
         else:
             random.seed()
-            object.waitcount = 0
-            object.movepos[0] = random.randint(-1,1)*3
-            object.movepos[1] = random.randint(-1,1)*3
-            object.state = "move"
+            sprite.waitcount = 0
+            sprite.movepos[0] = random.randint(-1,1)*3
+            sprite.movepos[1] = random.randint(-1,1)*3
+            sprite.state = "move"
             
-    if object.state == "move":
-        if object.movecount < 60:
-            object.movecount += 1
+    if sprite.state == "move":
+        if sprite.movecount < 60:
+            sprite.movecount += 1
         else:
-            object.movecount = 0
-            object.movepos = [0,0]
-            object.state = "wait1"
+            sprite.movecount = 0
+            sprite.movepos = [0,0]
+            sprite.state = "wait1"
             
-    if object.state == "wait1":
-        if object.waitcount < 40:
-            object.waitcount += 1
+    if sprite.state == "wait1":
+        if sprite.waitcount < 40:
+            sprite.waitcount += 1
         else:
             myProjectile = model.Projectile('slimeball.png', 2)
             character.currentroom.projectiles.add(myProjectile)
-            myProjectile.rect.center = object.rect.center
-            vec = utils.convert_to_unit_vector(object.rect.x, character.rect.x, object.rect.y, character.rect.y)
+            myProjectile.rect.center = sprite.rect.center
+            vec = utils.convert_to_unit_vector(sprite.rect.x, character.rect.x, sprite.rect.y, character.rect.y)
             myProjectile.movepos = [int(vec[0] * 12), int(vec[1] * 12)]
             
-            object.waitcount = 0
-            object.state = "wait2"
+            sprite.waitcount = 0
+            sprite.state = "wait2"
             
-    model.move(object, moveables, obstacles, object.movepos)
-    for current_collision in object.cannot_collide.sprites():
-        if not current_collision in pygame.sprite.spritecollide(object, moveables, 0):
-            object.cannot_collide.remove(current_collision)
+    model.move(sprite, moveables, obstacles, sprite.movepos)
+    for current_collision in sprite.cannot_collide.sprites():
+        if not current_collision in pygame.sprite.spritecollide(sprite, moveables, 0):
+            sprite.cannot_collide.remove(current_collision)
     pygame.event.pump()
 
-def Boss(object, obstacles, moveables, character):
+def Boss(sprite, obstacles, moveables, character):
     #states that can be chosen at random, move should not be a part of this
     states=['wait', 'charge', 'wander','walk_to_center']
-    if object.state == "hit":
-        if object.hitcount < 15:
-            object.hitcount += 1
+    if sprite.state == "hit":
+        if sprite.hitcount < 15:
+            sprite.hitcount += 1
         else:
-            object.hitcount = 0
-            object.pushcount = 0
-            object.waitcount = 0
-            object.movecount = 0
-            object.state = "wait"
-            for current_collisions in pygame.sprite.spritecollide(object, moveables,0):
-                object.cannot_collide.add(current_collisions)
-        model.move(object, moveables, obstacles, object.movepos)
+            sprite.hitcount = 0
+            sprite.pushcount = 0
+            sprite.waitcount = 0
+            sprite.movecount = 0
+            sprite.state = "wait"
+            for current_collisions in pygame.sprite.spritecollide(sprite, moveables,0):
+                sprite.cannot_collide.add(current_collisions)
+        model.move(sprite, moveables, obstacles, sprite.movepos)
         pygame.event.pump()
         return
-    if object.state == "pushback":
-        if object.pushcount < 2:
-            object.pushcount += 1
+    if sprite.state == "pushback":
+        if sprite.pushcount < 2:
+            sprite.pushcount += 1
         else:
-            object.pushcount = 0
-            object.movepos = [0,0]
-            object.state = "wait"
+            sprite.pushcount = 0
+            sprite.movepos = [0,0]
+            sprite.state = "wait"
     #wait state 
-    if object.state == "wait":
-        if object.waitcount < 40:
-            object.waitcount += 1
+    if sprite.state == "wait":
+        if sprite.waitcount < 40:
+            sprite.waitcount += 1
         else:
-            object.waitcount = 0
-            object.state = random.choice(states)
-            if object.state=='wander':                
-                object.movepos[0] = random.randint(-1,1)*3
-                object.movepos[1] = random.randint(-1,1)*3
-                object.state='wait'
+            sprite.waitcount = 0
+            sprite.state = random.choice(states)
+            if sprite.state=='wander':                
+                sprite.movepos[0] = random.randint(-1,1)*3
+                sprite.movepos[1] = random.randint(-1,1)*3
+                sprite.state='wait'
 
     #640x480 offset by 32
-    if object.state=='walk_to_center':
-        if object.waitcount < 40:
-            object.waitcount += 1
+    if sprite.state=='walk_to_center':
+        if sprite.waitcount < 40:
+            sprite.waitcount += 1
         else:
-            x_distance = abs(object.rect.x - ((640/2)+32))
-            y_distance = abs(object.rect.y - (480/2))
+            x_distance = abs(sprite.rect.x - ((640/2)+32))
+            y_distance = abs(sprite.rect.y - (480/2))
             x_speed = 12*x_distance/(x_distance+y_distance)
             y_speed = 12*y_distance/(x_distance+y_distance)
-            if object.rect.x > ((640/2)+32):
+            if sprite.rect.x > ((640/2)+32):
                 x_speed *= -1
-            if object.rect.y > (480/2):
+            if sprite.rect.y > (480/2):
                 y_speed *= -1
-            object.movepos = [x_speed, y_speed]
-            object.waitcount=0
-            object.state='wait'
-    if object.state=='charge':
-        if object.waitcount < 40:
-            object.waitcount+=1
+            sprite.movepos = [x_speed, y_speed]
+            sprite.waitcount=0
+            sprite.state='wait'
+    if sprite.state=='charge':
+        if sprite.waitcount < 40:
+            sprite.waitcount+=1
         else:
-            x_distance = abs(object.rect.x - character.rect.x)
-            y_distance = abs(object.rect.y - character.rect.y)
+            x_distance = abs(sprite.rect.x - character.rect.x)
+            y_distance = abs(sprite.rect.y - character.rect.y)
             x_speed = 20*x_distance/(x_distance+y_distance)
             y_speed = 20*y_distance/(x_distance+y_distance)
-            if object.rect.x > character.rect.x:
+            if sprite.rect.x > character.rect.x:
                 x_speed *= -1
-            if object.rect.y > character.rect.y:
+            if sprite.rect.y > character.rect.y:
                 y_speed *= -1
-            object.movepos = [x_speed, y_speed] 
-            object.waitcount = 0
-            object.state = "wait"
+            sprite.movepos = [x_speed, y_speed] 
+            sprite.waitcount = 0
+            sprite.state = "wait"
 
-    model.move(object, moveables, obstacles, object.movepos)
-    for current_collision in object.cannot_collide.sprites():
-        if not current_collision in pygame.sprite.spritecollide(object, moveables, 0):
-            object.cannot_collide.remove(current_collision)
+    model.move(sprite, moveables, obstacles, sprite.movepos)
+    for current_collision in sprite.cannot_collide.sprites():
+        if not current_collision in pygame.sprite.spritecollide(sprite, moveables, 0):
+            sprite.cannot_collide.remove(current_collision)
     pygame.event.pump()
