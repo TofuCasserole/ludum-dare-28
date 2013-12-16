@@ -7,6 +7,7 @@ Created on Dec 15, 2013
 import pygame
 from pygame import Rect
 import spritesheet
+from pygame.locals import USEREVENT
 import utils
 
 UP = 'up'
@@ -160,4 +161,8 @@ class Actor(pygame.sprite.Sprite):
         if self.rect.right < 32 or self.rect.left > 608 or self.rect.bottom < 32 or self.rect.top > 448:
             if self.respawns:
                 self.rect.center = self.area.center
+            else:
+                self.kill()
+                pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'MonsterDeath'}))
+                
         pygame.event.pump()

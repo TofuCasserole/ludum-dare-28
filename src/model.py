@@ -19,6 +19,7 @@ SOUTH = "south"
 LENGTH = 9
 WIDTH = 13
 
+import actor
 import os
 import random
 import pygame
@@ -42,12 +43,11 @@ def load_png(name):
             raise SystemExit, message
     return image
 
-class Character(pygame.sprite.Sprite):
+class Character(actor.Actor):
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = load_png('char.png')
-        self.image = pygame.transform.scale(self.image, (26, 26))
-        self.rect = self.image.get_rect()
+        image = load_png('char.png')
+        image = pygame.transform.scale(image, (26, 26))
+        actor.Actor.__init__(self, image, image.get_rect(), None, False, True)
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
         self.health = 100

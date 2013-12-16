@@ -13,7 +13,8 @@ from pygame.locals import *
 import random
 import utils
 
-MNM = {'name':'mnm', 'image':'mnm.png', 'behavior':behaviors.blue_mnm,
+MNM = {
+       'name':'mnm', 'image':'mnm.png', 'behavior':behaviors.blue_mnm,
        'health':20, 'strength':2, 'is_boss':False, 'random_state':False,
        'init_state':['wait'], 'size': 32,
        'state_anims':{'wait':([Rect(0,0,32,32)], True, 1),
@@ -22,6 +23,13 @@ MNM = {'name':'mnm', 'image':'mnm.png', 'behavior':behaviors.blue_mnm,
                               True, 8),
                       'windup':([Rect(96,0,32,32)], True, 1),
                       'jump':([Rect(128,0,32,32)], True, 1)}
+        }
+
+BOSS = {
+        'name':'boss', 'image':'mnm.png', 'behavior':behaviors.Boss,
+        'health':50, 'strenght':5, 'is_boss':True, 'random_state':False,
+        'init_state':['wait'], 'size': 32,
+        'state_anims':{}
         }
 
 class Monster(actor.Actor):
