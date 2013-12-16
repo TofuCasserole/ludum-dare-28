@@ -68,6 +68,7 @@ class Character(pygame.sprite.Sprite):
         self.hitmove = [0,0]
         self.sword_cooldown = 30
         self.rect.midleft = self.area.midleft
+        
         self.rect = self.rect.move([74,0])
         self.cannot_collide = pygame.sprite.Group()
     
