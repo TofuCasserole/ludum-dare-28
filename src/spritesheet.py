@@ -8,9 +8,14 @@
 import pygame
  
 class SpriteSheet(object):
+    
     def __init__(self, image):
         self.sheet = image
     # Load a specific image from a specific rectangle
+    
+    def subsheet(self, rectangle):
+        return SpriteSheet(self.image_at(rectangle))
+    
     def image_at(self, rectangle):
         "Loads image from x,y,x+offset,y+offset"
         rect = pygame.Rect(rectangle)
@@ -36,7 +41,7 @@ class SpriteStripAnim(object):
     __add__() method for joining strips which comes in handy when a
     strip wraps to the next row.
     """
-    def __init__(self, sheet, rect, count, loop=False, frames=1):
+    def __init__(self, sheet, rects, loop=False, frames=1):
         """construct a SpriteStripAnim
         
         filename, rect, count, and colorkey are the same arguments used
@@ -48,15 +53,17 @@ class SpriteStripAnim(object):
         frames is the number of ticks to return the same image before
         the iterator advances to the next image.
         """
-        self.images = sheet.load_strip(rect, count)
+        self.images = sheet.images_at(rects)
         self.i = 0
         self.loop = loop
         self.frames = frames
         self.f = frames
+    
     def iter(self):
         self.i = 0
         self.f = self.frames
         return self
+    
     def next(self):
         if self.i >= len(self.images):
             if not self.loop:
@@ -69,6 +76,7 @@ class SpriteStripAnim(object):
             self.i += 1
             self.f = self.frames
         return image
+    
     def __add__(self, ss):
         self.images.extend(ss.images)
         return self

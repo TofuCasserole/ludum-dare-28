@@ -5,17 +5,10 @@ Created on Dec 13, 2013
 '''
 MnM = 0
 MnM_RANGED = 1
-BOSS=2
+WEEPINGANGELS = 2
+SILENCE = 3
 
-boss_types = [2]
-
-MONSTER_IMAGES = ['mnm.png', 'green_mnm.png','mnm.png']
-
-UP = 0
-DOWN = 32
-LEFT = 64
-RIGHT = 96
-
+MONSTER_IMAGES = ['mnm.png', 'green_mnm.png']
 EAST = "east"
 WEST = "west"
 NORTH = "north"
@@ -28,33 +21,19 @@ import os
 import random
 import pygame
 import main
+import utils
 import behaviors
-import spritesheet
 from pygame.locals import *
-
-def load_png(name):
-    """ Load image and return image object"""
-    fullname = os.path.join('../', 'res', name)
-    try:
-        image = pygame.image.load(fullname)
-        if image.get_alpha() is None:
-            image = image.convert()
-        else:
-            image = image.convert_alpha()
-    except pygame.error, message:
-            print 'Cannot load image:', fullname
-            raise SystemExit, message
-    return image
 
 class Character(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = load_png('char.png')
+        self.image = utils.load_png('char.png')
         self.image = pygame.transform.scale(self.image, (26, 26))
         self.rect = self.image.get_rect()
         screen = pygame.display.get_surface()
         self.area = screen.get_rect()
-        self.health = 1
+        self.health = 100
         #self.room = start_room
         self.movepos = [0,0]
         self.tryingmoveright = False
@@ -68,7 +47,6 @@ class Character(pygame.sprite.Sprite):
         self.hitmove = [0,0]
         self.sword_cooldown = 30
         self.rect.midleft = self.area.midleft
-        
         self.rect = self.rect.move([74,0])
         self.cannot_collide = pygame.sprite.Group()
     
@@ -115,11 +93,11 @@ class Character(pygame.sprite.Sprite):
 
 class Monster(pygame.sprite.Sprite):
     
-    def __init__(self, type, behavior, isBoss=False):
+    def __init__(self, type, behavior):
         pygame.sprite.Sprite.__init__(self)
         self.dir = SOUTH
         self.behavior = behavior
-        self.image = load_png(MONSTER_IMAGES[type])
+        self.image = utils.load_png(MONSTER_IMAGES[type])
         self.image = pygame.transform.scale2x(self.image)
         self.rect = self.image.get_rect()
         screen = pygame.display.get_surface()
@@ -140,8 +118,6 @@ class Monster(pygame.sprite.Sprite):
             self.movepos[1] = random.randint(-1,1)*3
             self.movecount = random.randint(0,60)
             self.waitcount = random.randint(0,40)
-        self.isBoss=isBoss
-        self.type = type
         if type == MnM:
             self.state = "wait"
         elif type == MnM_RANGED:
@@ -155,6 +131,7 @@ class Monster(pygame.sprite.Sprite):
             self.state='wait' 
             self.waitcount = 0
             self.movecount = 0
+     
     def getmovepos(self):
         return self.movepos
     
@@ -177,19 +154,12 @@ class Monster(pygame.sprite.Sprite):
     
     def update(self, obstacles, moveables, character):
         self.behavior(self, obstacles, moveables, character)
-        if (self.rect.bottom < 32 or self.rect.top > 448 or
-            self.rect.right < 64 or self.rect.bottom > self.rect.left > 608):
-            if not self.type in boss_types:
-                self.kill()
-                pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'MonsterDeath'}))
-            else:
-                self.rect.center = self.area.center
     
 
 class Projectile(pygame.sprite.Sprite):
     def __init__(self, image, strength):
         pygame.sprite.Sprite.__init__(self)
-        self.image = load_png(image)
+        self.image = utils.load_png(image)
         self.image = pygame.transform.scale(self.image, (16, 16))
         self.rect = self.image.get_rect()
         self.strength = strength
@@ -216,7 +186,7 @@ class Projectile(pygame.sprite.Sprite):
 class Sword(pygame.sprite.Sprite):
     def __init__(self, character):
         pygame.sprite.Sprite.__init__(self)
-        self.image = load_png('sword.png')
+        self.image = utils.load_png('sword.png')
         self.image = pygame.transform.scale2x(self.image)
         self.rect = self.image.get_rect()
         self.rotate = 90
@@ -267,10 +237,7 @@ class Sword(pygame.sprite.Sprite):
             monster.health -= self.strength
             if monster.health <= 0:
                 monster.kill()
-                if monster.isBoss:
-                    pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'BossDeath'}))
-                else:
-                    pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'MonsterDeath'}))
+                pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'MonsterDeath'}))
             if character.last_direction_moved == "right":
                 monster.rect.left = self.rect.right
                 monster.movepos = [16, 0]
@@ -288,7 +255,7 @@ class Sword(pygame.sprite.Sprite):
 class Obstacle(pygame.sprite.Sprite):
     def __init__(self, location, sprite):
         pygame.sprite.Sprite.__init__(self)
-        self.image = load_png(sprite)
+        self.image = utils.load_png(sprite)
         self.image = pygame.transform.scale2x(self.image)
         self.rect = self.image.get_rect()
         screen = pygame.display.get_surface()
@@ -299,7 +266,7 @@ class Obstacle(pygame.sprite.Sprite):
 class Door(pygame.sprite.Sprite):
     def __init__(self, location):
         pygame.sprite.Sprite.__init__(self)
-        self.image = load_png('char.png')
+        self.image = utils.load_png('char.png')
         self.image = pygame.transform.scale(self.image, (32, 32))
         self.rect = self.image.get_rect()
         self.rect.topleft = location
@@ -308,72 +275,16 @@ class Door(pygame.sprite.Sprite):
         if pygame.sprite.collide_mask(self, character):
             if self.rect.left == 320 and self.rect.top == 0:
                 character.rect.y = 416
-                character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['north'])
-                character.currentroom.moveables.add(character)
             elif self.rect.left == 320 and self.rect.top == 448:
-                character.rect.y = 32                
-                character.currentroom.moveables.remove(character)
+                character.rect.y = 32
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['south'])
-                character.currentroom.moveables.add(character)
             elif self.rect.top == 224 and self.rect.left == 32:
                 character.rect.x = 576
-                character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['west'])
-                character.currentroom.moveables.add(character)
             elif self.rect.top == 224 and self.rect.left == 608:
                 character.rect.x = 64
-                character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['east'])
-                character.currentroom.moveables.add(character)
-        for monster in pygame.sprite.spritecollide(self, character.currentroom.monsters, 0):
-            if self.rect.left == 320 and self.rect.top == 0:
-                monster.rect.top = self.rect.bottom
-            elif self.rect.left == 320 and self.rect.top == 448:
-                monster.rect.bottom = self.rect.top
-            elif self.rect.top == 224 and self.rect.left == 32:
-                monster.rect.left = self.rect.right
-            elif self.rect.top == 224 and self.rect.left == 608:
-                monster.rect.right = self.rect.left
-
-class MedBay(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = load_png('bossdoor.png')
-        self.image = pygame.transform.scale(self.image, (32, 32))
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (576,416)
-        self.can_heal = False
-        self.health = 25
-        
-    def update(self, character):
-        if pygame.sprite.collide_rect(self, character) and self.health > 0 and character.health < 100:
-            self.can_heal = True
-        else:
-            self.can_heal = False
-            self.is_healing = False
-        if self.is_healing:
-            self.health -= .25
-            character.health += .25
-                
-class BossDoor(pygame.sprite.Sprite):
-    def __init__(self, location):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = load_png('bossdoor.png')
-        self.image = pygame.transform.scale(self.image, (32, 32))
-        self.rect = self.image.get_rect()
-        self.rect.topleft = location
-        
-    def update(self, moveables):
-        for sprite in pygame.sprite.spritecollide(self, moveables, 0):
-            if self.rect.left == 320 and self.rect.top == 0:
-                sprite.rect.top = self.rect.bottom
-            elif self.rect.left == 320 and self.rect.top == 448:
-                sprite.rect.bottom = self.rect.top
-            elif self.rect.top == 224 and self.rect.left == 32:
-                sprite.rect.left = self.rect.right
-            elif self.rect.top == 224 and self.rect.left == 608:
-                sprite.rect.right = self.rect.left
 '''
 doors are passed as an array of "east", "north", "south", and "west"
 
@@ -478,37 +389,30 @@ class Room:
         self.walls = pygame.sprite.RenderUpdates()
         self.door_sprites = pygame.sprite.RenderUpdates()
         self.projectiles = pygame.sprite.RenderUpdates()
-        self.bossdoors = pygame.sprite.RenderUpdates()
-        self.medbay = pygame.sprite.RenderUpdates()
         self.cord=cord
         
     def add_monsters(self, charactersprites, level):
-        if level.bossRoom==self.cord:
-            temp_monster = Monster(2, behaviors.Boss, True)
-            temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-32), random.randint(0,temp_monster.area.bottom-32))
-            while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
-               or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
-                    temp_monster.rect.topleft = (random.randint(0,temp_monster.area.right), random.randint(0,temp_monster.area.bottom))
-            self.monsters.add(temp_monster)
-            self.moveables.add(self.monsters)
-            return
+                
         for i in range(random.randint(3,5)):
             x = random.randint(0,1)
             if x == 0:
                 temp_monster = Monster(0, behaviors.blue_mnm)
             if x == 1:
                 temp_monster = Monster(1, behaviors.green_mnm)
-            temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-64), random.randint(0,temp_monster.area.bottom-64))
+            temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-32), random.randint(0,temp_monster.area.bottom-32))
             while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
                or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
                     temp_monster.rect.topleft = (random.randint(0,temp_monster.area.right), random.randint(0,temp_monster.area.bottom))
             self.monsters.add(temp_monster)
-        level.num_monsters += len(self.monsters.sprites())
+        level.num_monsters += i
         self.moveables.add(self.monsters)
         
-  
-    def generateWalls(self, level):
-        #print(self.doors)
+    def __str__(self):
+        return str(self.cord)+':'+str(self.connectingRooms)
+    def __repr__(self):
+        return self.__str__()
+    def generateWalls(self):
+        print(self.doors)
         if self.obstacles!=None and self.monsters!=None:
             possible_locations = [(x,y) for x in range(0, WIDTH) for y in range (0, LENGTH) if (x,y) not in self.obstacles]
             random.shuffle(possible_locations)
@@ -520,37 +424,21 @@ class Room:
             if not (x == 320 and NORTH in self.connectingRooms):
                 self.walls.add(Obstacle((x, 0), "wall.png"))
             else:
-                myDoor = Door((320,0))
-                self.door_sprites.add(myDoor)
-                if level.bossRoom == (self.cord[0], self.cord[1]-1):
-                    self.door_sprites.remove(myDoor)
-                    self.bossdoors.add(BossDoor((320,0)))
+                self.door_sprites.add(Door((320,0)))
             if not (x == 320 and SOUTH in self.connectingRooms):
                 self.walls.add(Obstacle((x, 448), "wall.png"))
             else:
-                myDoor = Door((320,448))
-                self.door_sprites.add(myDoor)
-                if level.bossRoom == (self.cord[0], self.cord[1]+1):
-                    self.door_sprites.remove(myDoor)
-                    self.bossdoors.add(BossDoor((320,448)))
+                self.door_sprites.add(Door((320,448)))
         # generate east/west walls
         for y in range(0, 480, 32):
             if not (y == 224 and WEST in self.connectingRooms):
                 self.walls.add(Obstacle((32, y), "wall.png"))
             else:
-                myDoor = Door((32,224))
-                self.door_sprites.add(myDoor)
-                if level.bossRoom == (self.cord[0]-1, self.cord[1]):
-                    self.door_sprites.remove(myDoor)
-                    self.bossdoors.add(BossDoor((32,224)))
+                self.door_sprites.add(Door((32,224)))
             if not (y == 224 and EAST in self.connectingRooms):
                 self.walls.add(Obstacle((608, y), "wall.png"))
             else:
-                myDoor = Door((608,224))
-                self.door_sprites.add(myDoor)
-                if level.bossRoom == (self.cord[0]+1, self.cord[1]):
-                    self.door_sprites.remove(myDoor)
-                    self.bossdoors.add(BossDoor((608,224)))
+                self.door_sprites.add(Door((608,224)))
 
     def monster_locations(self):
         return [monster.location for monster in self.monsters]
@@ -561,29 +449,24 @@ cur_room_col = 0
 
 
 class Level:
-    def __init__(self,levelNumber, debug=False):
+    def __init__(self, debug=False):
         if not debug:
             self.SIZE=10
             self.levelGrid=[[-1]*self.SIZE for x in range(self.SIZE)]
-            self.levelNumber=levelNumber
+        
             self.numberOfRooms=random.randint(10,15)
             self.rootRoom=(self.SIZE/2,self.SIZE/2)
             self.generateLevel()
-            self.bossRoom=self.findLongestPath(self.rootRoom)
             self.generateWalls()
+            self.bossRoom=self.findLongestPath(self.rootRoom)
             self.printGrid()
             self.generateObstacles()
-            self.addmedbay()
             self.num_monsters = 0
-    def addmedbay(self):
-        mylist = [i for i in self.getAllRooms() if i.cord != self.bossRoom]
-        random.shuffle(mylist)
-        mylist.pop().medbay.add(MedBay())
     def generateWalls(self):
         for i in range(self.SIZE):
             for j in range(self.SIZE):
                 if isinstance(self.levelGrid[i][j],Room):
-                    self.levelGrid[i][j].generateWalls(self)
+                    self.levelGrid[i][j].generateWalls()
     def getLocation(self, gridCords):
         return self.levelGrid[gridCords[0]][gridCords[1]]
     def getAllRooms(self):
@@ -608,7 +491,7 @@ class Level:
             currentY=currentPlace[1]
             #generate some exits
             exits=self.generateExits(currentPlace)
-            #print("Current Room:", currentPlace)
+            print("Current Room:", currentPlace)
             for i in range(4):
                 if exits[i]==-1:
                     continue
@@ -626,7 +509,7 @@ class Level:
             self.levelGrid[currentX][currentY].doors = []
             for room in self.levelGrid[currentX][currentY].connectingRooms:
                 self.levelGrid[currentX][currentY].doors.append(room)
-            #print "Neighbors:", self.levelGrid[currentX][currentY].doors
+            print "Neighbors:", self.levelGrid[currentX][currentY].doors
             if len(queue)>0:
                 currentPlace=queue.pop(0)
             else:
@@ -661,7 +544,7 @@ class Level:
                     if not bool(random.randint(0,1)):
                         newRooms[i]=-1
                         continue
-        #print(newRooms)
+        print(newRooms)
         return newRooms
     def findLongestPath(self, startingPos):
         #we need to populate the queue and get going!
@@ -742,8 +625,8 @@ class Level:
                 line+=roomGrid[i][j]
             print line
         print
+        print
     def printGrid(self):
-        print "level: ",self.levelNumber
         for i in range(self.SIZE):
             line=''
             for j in range(self.SIZE):

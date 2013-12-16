@@ -80,12 +80,6 @@ def blue_mnm(object, obstacles, moveables, character):
             object.dir = model.WEST
         elif object.movepos[0] > 0:
             object.dir = model.EAST
-        
-    model.move(object, moveables, obstacles, object.movepos)
-    for current_collision in object.cannot_collide.sprites():
-        if not current_collision in pygame.sprite.spritecollide(object, moveables, 0):
-            object.cannot_collide.remove(current_collision)
-    pygame.event.pump()
 
 def green_mnm(object, obstacles, moveables, character):
     if object.state == "hit":

@@ -5,6 +5,8 @@ Created on Dec 15, 2013
 '''
 
 import math
+import os
+import pygame
 
 def distance(coorda, coordb):
     w = coorda[0] + coordb[0]
@@ -21,3 +23,17 @@ def convert_to_unit_vector(x1, x2, y1, y2):
     if y1 > y2:
         y_speed *= -1
     return (x_speed, y_speed)
+
+def load_png(name):
+    """ Load image and return image object"""
+    fullname = os.path.join('../', 'res', name)
+    try:
+        image = pygame.image.load(fullname)
+        if image.get_alpha() is None:
+            image = image.convert()
+        else:
+            image = image.convert_alpha()
+    except pygame.error, message:
+            print 'Cannot load image:', fullname
+            raise SystemExit, message
+    return image

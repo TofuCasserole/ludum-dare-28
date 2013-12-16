@@ -5,20 +5,36 @@ Created on Dec 15, 2013
 '''
 
 import pygame
+from pygame import Rect
 import spritesheet
-import model
+import utils
 
 UP = 'up'
 DOWN = 'down'
 LEFT = 'left'
 RIGHT = 'right'
 
+def create_anim(state_name, rectangle):
+    
+
 class Actor(pygame.sprite.Sprite):
     
-    def __init__(self, image, rect):
-        self.sheet = spritesheet.SpriteSheet(pygame.transform.scale2x(model.load_png(image)))
+    def __init__(self, image, rectangle, state_anims, directional=True, respawns=False):
+        self.respawns = respawns
+        self.isdirectional = directional
+        img = pygame.transform.scale2x(utils.load_png(image))
+        if directional:
+            sheet = spritesheet.SpriteSheet(img)
+            upsheet = sheet.subsheet(Rect(0,0,img.rect.w,rectangle.h))
+            downsheet = sheet.subsheet(Rect(0,32,img.rect.w,rectangle.h))
+            leftsheet = sheet.subsheet(Rect(0,64,img.rect.w,rectangle.h))
+            rightsheet = sheet.subsheet(Rect(0,96,img.rect.w,rectangle.h))
+            upanims = dict(map())
+            self.rect = rectangle
+        else:
+            self.image = img
+            self.rect = img.rect
         self.movepos = [0,0]
-        self.rect = rect
         
     def move(self, moveables, obstacles, movepos, realign = False):
         newpos = self.rect.move([movepos[0], 0])
@@ -96,24 +112,24 @@ class Actor(pygame.sprite.Sprite):
                         continue
                     self.move(moveable2, moveables, obstacles, moveable2.getmovepos(), True)
     
-    def update(self, action, moveables, obstacles):
-        action(self, moveables, obstacles)
-
-        if abs(self.movepos[0]) < abs(self.movepos[1]):
-            if self.movepos[1] < 0:
-                self.dir = UP
-            elif self.movepos[1] > 0:
-                self.dir = DOWN
-        elif abs(self.movepos[0]) > abs(self.movepos[1]):
-            if self.movepos[0] < 0:
-                self.dir = LEFT
-            elif self.movepos[0] > 0:
-                self.dir = RIGHT
+    def update(self, moveables, obstacles):
+        if self.isdirectional:
+            if abs(self.movepos[0]) < abs(self.movepos[1]):
+                if self.movepos[1] < 0:
+                    self.dir = UP
+                elif self.movepos[1] > 0:
+                    self.dir = DOWN
+            elif abs(self.movepos[0]) > abs(self.movepos[1]):
+                if self.movepos[0] < 0:
+                    self.dir = LEFT
+                elif self.movepos[0] > 0:
+                    self.dir = RIGHT
         
         self.move(moveables, obstacles, self.getmovepos())
         for current_collision in self.cannot_collide.sprites():
             if not current_collision in pygame.sprite.spritecollide(self, moveables, 0):
                 self.cannot_collide.remove(current_collision)
         if self.rect.right < 32 or self.rect.left > 608 or self.rect.bottom < 32 or self.rect.top > 448:
-            self.rect.center = self.area.center
+            if self.respawns:
+                self.rect.center = self.area.center
         pygame.event.pump()
