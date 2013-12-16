@@ -37,6 +37,7 @@ def main():
     moveables.add(character)
     
     character.currentroom = l.getLocation(l.rootRoom)
+    character.currentroom.moveables.add(character)
     
     for room in l.getAllRooms():
         room.add_monsters(charactersprites, l)
@@ -53,7 +54,10 @@ def main():
                 if event.subtype == "MonsterDeath":
                     l.num_monsters -= 1
                     if l.num_monsters == 0:
-                        print "Level Clear!"
+                        for room in l.getAllROoms():
+                            if room.bossdoors.sprites != []:
+                                room.door_sprites.add(model.Door(room.bossdoors.sprites[0].rect.topleft))
+                                room.bossdoors.clear()
             elif event.type == KEYDOWN:
                 if event.key == K_SPACE or event.key == K_RETURN:
                     if sword.sprites() == [] and character.sword_cooldown > 10:
@@ -131,12 +135,14 @@ def main():
         character.currentroom.walls.draw(screen)
         character.currentroom.monsters.draw(screen)
         character.currentroom.projectiles.draw(screen)
+        character.currentroom.bossdoors.draw(screen)
         #for monster in currentroom.monsters.sprites():
         #    screen.blit(monster.image, monster.rect)
         charactersprites.update(character.currentroom.walls, character.currentroom.moveables, sword)
         sword.update(character, character.currentroom.monsters)
         charactersprites.draw(screen)
         character.currentroom.projectiles.update(charactersprites)
+        character.currentroom.bossdoors.update(character.currentroom.moveables)
         character.currentroom.monsters.update(character.currentroom.walls, character.currentroom.moveables, character)
         #obstacles.draw(screen)
         character.currentroom.door_sprites.update(character, l)

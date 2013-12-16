@@ -296,16 +296,24 @@ class Door(pygame.sprite.Sprite):
         if pygame.sprite.collide_mask(self, character):
             if self.rect.left == 320 and self.rect.top == 0:
                 character.rect.y = 416
+                character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['north'])
+                character.currentroom.moveables.add(character)
             elif self.rect.left == 320 and self.rect.top == 448:
-                character.rect.y = 32
+                character.rect.y = 32                
+                character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['south'])
+                character.currentroom.moveables.add(character)
             elif self.rect.top == 224 and self.rect.left == 32:
                 character.rect.x = 576
+                character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['west'])
+                character.currentroom.moveables.add(character)
             elif self.rect.top == 224 and self.rect.left == 608:
                 character.rect.x = 64
+                character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['east'])
+                character.currentroom.moveables.add(character)
         for monster in pygame.sprite.spritecollide(self, character.currentroom.monsters, 0):
             if self.rect.left == 320 and self.rect.top == 0:
                 monster.rect.top = self.rect.bottom
@@ -315,6 +323,25 @@ class Door(pygame.sprite.Sprite):
                 monster.rect.left = self.rect.right
             elif self.rect.top == 224 and self.rect.left == 608:
                 monster.rect.right = self.rect.left
+                
+class BossDoor(pygame.sprite.Sprite):
+    def __init__(self, location):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = load_png('bossdoor.png')
+        self.image = pygame.transform.scale(self.image, (32, 32))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = location
+        
+    def update(self, moveables):
+        for sprite in pygame.sprite.spritecollide(self, moveables, 0):
+            if self.rect.left == 320 and self.rect.top == 0:
+                sprite.rect.top = self.rect.bottom
+            elif self.rect.left == 320 and self.rect.top == 448:
+                sprite.rect.bottom = self.rect.top
+            elif self.rect.top == 224 and self.rect.left == 32:
+                sprite.rect.left = self.rect.right
+            elif self.rect.top == 224 and self.rect.left == 608:
+                sprite.rect.right = self.rect.left
 '''
 doors are passed as an array of "east", "north", "south", and "west"
 
@@ -419,6 +446,7 @@ class Room:
         self.walls = pygame.sprite.RenderUpdates()
         self.door_sprites = pygame.sprite.RenderUpdates()
         self.projectiles = pygame.sprite.RenderUpdates()
+        self.bossdoors = pygame.sprite.RenderUpdates()
         self.cord=cord
         
     def add_monsters(self, charactersprites, level):
@@ -441,7 +469,7 @@ class Room:
         return str(self.cord)+':'+str(self.connectingRooms)
     def __repr__(self):
         return self.__str__()
-    def generateWalls(self):
+    def generateWalls(self, level):
         print(self.doors)
         if self.obstacles!=None and self.monsters!=None:
             possible_locations = [(x,y) for x in range(0, WIDTH) for y in range (0, LENGTH) if (x,y) not in self.obstacles]
@@ -454,21 +482,37 @@ class Room:
             if not (x == 320 and NORTH in self.connectingRooms):
                 self.walls.add(Obstacle((x, 0), "wall.png"))
             else:
-                self.door_sprites.add(Door((320,0)))
+                myDoor = Door((320,0))
+                self.door_sprites.add(myDoor)
+                if level.bossRoom == (self.cord[0], self.cord[1]-1):
+                    self.door_sprites.remove(myDoor)
+                    self.bossdoors.add(BossDoor((320,0)))
             if not (x == 320 and SOUTH in self.connectingRooms):
                 self.walls.add(Obstacle((x, 448), "wall.png"))
             else:
-                self.door_sprites.add(Door((320,448)))
+                myDoor = Door((320,448))
+                self.door_sprites.add(myDoor)
+                if level.bossRoom == (self.cord[0], self.cord[1]+1):
+                    self.door_sprites.remove(myDoor)
+                    self.bossdoors.add(BossDoor((320,448)))
         # generate east/west walls
         for y in range(0, 480, 32):
             if not (y == 224 and WEST in self.connectingRooms):
                 self.walls.add(Obstacle((32, y), "wall.png"))
             else:
-                self.door_sprites.add(Door((32,224)))
+                myDoor = Door((32,224))
+                self.door_sprites.add(myDoor)
+                if level.bossRoom == (self.cord[0]-1, self.cord[1]):
+                    self.door_sprites.remove(myDoor)
+                    self.bossdoors.add(BossDoor((32,224)))
             if not (y == 224 and EAST in self.connectingRooms):
                 self.walls.add(Obstacle((608, y), "wall.png"))
             else:
-                self.door_sprites.add(Door((608,224)))
+                myDoor = Door((608,224))
+                self.door_sprites.add(myDoor)
+                if level.bossRoom == (self.cord[0]+1, self.cord[1]):
+                    self.door_sprites.remove(myDoor)
+                    self.bossdoors.add(BossDoor((608,224)))
 
     def monster_locations(self):
         return [monster.location for monster in self.monsters]
@@ -487,8 +531,8 @@ class Level:
             self.numberOfRooms=random.randint(10,15)
             self.rootRoom=(self.SIZE/2,self.SIZE/2)
             self.generateLevel()
-            self.generateWalls()
             self.bossRoom=self.findLongestPath(self.rootRoom)
+            self.generateWalls()
             self.printGrid()
             self.generateObstacles()
             self.num_monsters = 0
@@ -496,7 +540,7 @@ class Level:
         for i in range(self.SIZE):
             for j in range(self.SIZE):
                 if isinstance(self.levelGrid[i][j],Room):
-                    self.levelGrid[i][j].generateWalls()
+                    self.levelGrid[i][j].generateWalls(self)
     def getLocation(self, gridCords):
         return self.levelGrid[gridCords[0]][gridCords[1]]
     def getAllRooms(self):
