@@ -18,8 +18,8 @@ def main():
     for x in range(32,640,32):
         for y in range(0,480,32):
             background.blit(dirt, (x,y))
-    
-    l=model.Level()    
+    levelNumber=1 
+    l=model.Level(levelNumber)    
     character = model.Character()
     
     healthbar = gui.HealthBar()
@@ -54,6 +54,15 @@ def main():
                     l.num_monsters -= 1
                     if l.num_monsters == 0:
                         print "Level Clear!"
+                if event.subtype=='BossDeath':
+                    #now we have to start a new level!
+                    levelNumber+=1
+                    l=model.Level(levelNumber)
+                    character.currentroom = l.getLocation(l.rootRoom)
+                    for room in l.getAllRooms():
+                        room.add_monsters(charactersprites, l)
+                    obstacles.add(character.currentroom.walls)
+                    continue
             elif event.type == KEYDOWN:
                 if event.key == K_SPACE or event.key == K_RETURN:
                     if sword.sprites() == [] and character.sword_cooldown > 10:
@@ -142,6 +151,5 @@ def main():
         character.currentroom.door_sprites.update(character, l)
         sword.draw(screen)
         pygame.display.flip()
-
 if __name__ == '__main__':
     main()

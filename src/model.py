@@ -105,7 +105,7 @@ class Character(pygame.sprite.Sprite):
         
 
 class Monster(pygame.sprite.Sprite):
-    def __init__(self, type, behavior):
+    def __init__(self, type, behavior, isBoss=False):
         self.behavior = behavior
         pygame.sprite.Sprite.__init__(self)
         self.image = load_png(MONSTER_IMAGES[type])
@@ -119,6 +119,7 @@ class Monster(pygame.sprite.Sprite):
         self.hitcount = 0
         self.pushcount = 0
         self.cannot_collide = pygame.sprite.Group()
+        self.isBoss=isBoss
         if type == MnM:
             self.health = 20
             self.strength = 2
@@ -250,7 +251,10 @@ class Sword(pygame.sprite.Sprite):
             monster.health -= self.strength
             if monster.health <= 0:
                 monster.kill()
-                pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'MonsterDeath'}))
+                if monster.isBoss:
+                    pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'BossDeath'}))
+                else:
+                    pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'MonsterDeath'}))
             if character.last_direction_moved == "right":
                 monster.rect.left = self.rect.right
                 monster.movepos = [16, 0]
@@ -406,7 +410,7 @@ class Room:
         
     def add_monsters(self, charactersprites, level):
         if level.bossRoom==self.cord:
-            temp_monster = Monster(2, behaviors.Boss)
+            temp_monster = Monster(2, behaviors.Boss, True)
             temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-32), random.randint(0,temp_monster.area.bottom-32))
             while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
                or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
@@ -428,12 +432,8 @@ class Room:
         level.num_monsters += i
         self.moveables.add(self.monsters)
         
-    def __str__(self):
-        return str(self.cord)+':'+str(self.connectingRooms)
-    def __repr__(self):
-        return self.__str__()
     def generateWalls(self):
-        print(self.doors)
+        #print(self.doors)
         if self.obstacles!=None and self.monsters!=None:
             possible_locations = [(x,y) for x in range(0, WIDTH) for y in range (0, LENGTH) if (x,y) not in self.obstacles]
             random.shuffle(possible_locations)
@@ -470,11 +470,11 @@ cur_room_col = 0
 
 
 class Level:
-    def __init__(self, debug=False):
+    def __init__(self,levelNumber, debug=False):
         if not debug:
             self.SIZE=10
             self.levelGrid=[[-1]*self.SIZE for x in range(self.SIZE)]
-        
+            self.levelNumber=levelNumber
             self.numberOfRooms=random.randint(10,15)
             self.rootRoom=(self.SIZE/2,self.SIZE/2)
             self.generateLevel()
@@ -512,7 +512,7 @@ class Level:
             currentY=currentPlace[1]
             #generate some exits
             exits=self.generateExits(currentPlace)
-            print("Current Room:", currentPlace)
+            #print("Current Room:", currentPlace)
             for i in range(4):
                 if exits[i]==-1:
                     continue
@@ -530,7 +530,7 @@ class Level:
             self.levelGrid[currentX][currentY].doors = []
             for room in self.levelGrid[currentX][currentY].connectingRooms:
                 self.levelGrid[currentX][currentY].doors.append(room)
-            print "Neighbors:", self.levelGrid[currentX][currentY].doors
+            #print "Neighbors:", self.levelGrid[currentX][currentY].doors
             if len(queue)>0:
                 currentPlace=queue.pop(0)
             else:
@@ -565,7 +565,7 @@ class Level:
                     if not bool(random.randint(0,1)):
                         newRooms[i]=-1
                         continue
-        print(newRooms)
+        #print(newRooms)
         return newRooms
     def findLongestPath(self, startingPos):
         #we need to populate the queue and get going!
@@ -646,8 +646,8 @@ class Level:
                 line+=roomGrid[i][j]
             print line
         print
-        print
     def printGrid(self):
+        print "level: ",self.levelNumber
         for i in range(self.SIZE):
             line=''
             for j in range(self.SIZE):
