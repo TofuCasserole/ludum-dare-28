@@ -23,7 +23,7 @@ def blue_mnm(object, obstacles, moveables, character):
                 object.cannot_collide.add(current_collisions)
     
     if object.state != "hit" and object.state != "pushback" and object.state != "windup" and object.state != "jump":
-        if utils.distance(object.rect.topleft, character.rect.topleft) <= 500:
+        if utils.distance(object.rect.topleft, character.rect.topleft) <= 1000:
             object.target = character.rect.topleft
             object.waitcount = 0
             object.movecount = 0

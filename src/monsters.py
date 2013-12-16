@@ -17,7 +17,7 @@ MNM = {'name':'mnm', 'image':'mnm.png', 'behavior':behaviors.blue_mnm,
        'init_state':['wait'], 'size': 32,
        'state_anims':{'wait':([Rect(0,0,32,32)], True, 1),
                       'move':([Rect(0,0,32,32), Rect(32,0,32,32),
-                               Rect(0,0,32,32), Rect(32,0,32,32)],
+                               Rect(0,0,32,32), Rect(64,0,32,32)],
                               True, 8),
                       'windup':([Rect(96,0,32,32)], True, 1),
                       'jump':([Rect(128,0,32,32)], True, 1)}
