@@ -6,13 +6,14 @@ Created on Dec 13, 2013
 import pygame
 from pygame.locals import *
 import model
+import utils
 import gui
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((640, 480))
     myFont = pygame.font.Font('../res/SWFIT_SL.TTF', 24)
-    dirt = pygame.transform.scale2x(model.load_png("dirt.png"))
+    dirt = pygame.transform.scale2x(utils.load_png("dirt.png"))
     background = pygame.Surface(screen.get_size())
     background = background.convert()
     for x in range(32,640,32):

@@ -4,14 +4,13 @@ Created on Dec 14, 2013
 @author: kristoffe
 '''
 import pygame
-import os
-import model
+import utils
 from spritesheet import SpriteSheet
 
 class HealthBar():
     
     def __init__(self):
-        self.sheet = SpriteSheet(pygame.transform.scale2x(model.load_png("gui.png")))
+        self.sheet = SpriteSheet(pygame.transform.scale2x(utils.load_png("gui.png")))
         self.health = 100
     
     def draw(self, surface):

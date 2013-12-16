@@ -15,7 +15,7 @@ LEFT = 'left'
 RIGHT = 'right'
 
 def create_anim(state_name, rectangle):
-    
+    pass
 
 class Actor(pygame.sprite.Sprite):
     
