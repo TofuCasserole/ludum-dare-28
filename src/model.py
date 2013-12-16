@@ -404,7 +404,8 @@ class Room:
         self.cord=cord
         
     def add_monsters(self, charactersprites, level):
-                
+        if level.bossRoom==self.cord:
+            return
         for i in range(random.randint(3,5)):
             x = random.randint(0,1)
             if x == 0:
