@@ -1,3 +1,4 @@
+import pygame._view
 '''
 Created on Dec 13, 2013
 
@@ -89,6 +90,78 @@ def main():
                     el=model.Elevator()
                     l.getLocation(l.bossRoom).levelExit.add(el)
                 if event.subtype=='ChangeLevel':
+                    #show the player the buff screen and then start a new level!
+                    alpha = pygame.Surface(screen.get_size())
+                    alpha.fill((0,0,0))
+                    alpha.set_alpha(128)
+                    screen.blit(alpha, (0,0))
+                    exit_inventory = False
+                    item_selected = 0
+                    utils.text_format(screen, "Convert a rune into a permanent buff", 20, (20,0),(212,212,212), 40)
+                    utils.text_format(screen, "Or press ESC to exit", 20, (150, 435), (212,212,212), 40)
+                    pygame.display.flip()
+                    
+                    while(1):
+                        inventory.fill((224,224,224))
+                        inventory = inventory.convert()
+                        utils.text_format(inventory, "INVENTORY", 24, (170,0), (0, 0, 255), 28)
+                        utils.text_format(inventory, "Runes:", 16, (360, 34), (255,0,0),20)
+                        utils.text_format(inventory, "Buffs:", 16, (100, 34), (255,0,255),20)
+                        
+                        i = 0
+                        runes = []
+                        for rune in has_runes:
+                            if rune == True:
+                                runes.append(i)
+                            i += 1
+                        buffs = []
+                        for buff in has_buffs:
+                            if buff is not False:
+                                buffs.append(buff)
+                        
+                        event_list = [event for event in pygame.event.get()]
+                        for event in event_list:
+                            if event.type == QUIT:
+                                return
+                            elif event.type == KEYDOWN:
+                                if event.key == K_ESCAPE:
+                                    exit_inventory = True
+                                elif event.key == K_DOWN:
+                                    if (item_selected <(len(runes)-1)):
+                                        item_selected += 1
+                                elif event.key == K_UP:
+                                    if (item_selected>0):
+                                        item_selected -= 1
+                                elif event.key == K_RETURN:
+                                    buff_num = runes[item_selected]
+                                    has_buffs[len(buffs)] = buff_num
+                                    has_runes[buff_num] = False
+                                    character.buff_effects[buff_num] = True
+                                    exit_inventory = True
+                        if exit_inventory:
+                            break
+                        if(len(runes) != 0):
+                           inventory.blit(selector, (14,62+36*(item_selected+len(buffs))))
+                        for y in range(62,350,36):
+                            inventory.blit(panel, (272, y+2))
+                        for y in range(62,350,36):
+                            inventory.blit(panel, (16, y+2))
+                        
+                        i = 0
+                        for buff in buffs:
+                            inventory.blit(runes_pictures[buff], (16, 64+36*i))
+                            utils.text_format(inventory, buffs_text[buff], 8, (54, 66+36*i), (255,255,255), 22)
+                            i += 1
+                        i = 0
+                        for rune in runes:
+                            inventory.blit(runes_pictures[rune], (274,64+36*i))
+                            utils.text_format(inventory, runes_text[rune], 8, (312,66+36*i), (255, 255, 255), 22)
+                            inventory.blit(runes_pictures[rune], (16, 64+36*(i+len(buffs))))
+                            utils.text_format(inventory, add_buffs_text[rune], 8, (54, 72+36*(i+len(buffs))), (255,255,255), 22)
+                            i += 1
+                        screen.blit(inventory, (56,56))
+                        pygame.display.flip()
+
                     #now we have to start a new level!
                     levelNumber+=1
                     l=model.Level(levelNumber)
@@ -162,78 +235,6 @@ def main():
                             i += 1
                         screen.blit(inventory, (56,56))
                         pygame.display.flip()
-                if event.key == K_b:
-                    alpha = pygame.Surface(screen.get_size())
-                    alpha.fill((0,0,0))
-                    alpha.set_alpha(128)
-                    screen.blit(alpha, (0,0))
-                    exit_inventory = False
-                    item_selected = 0
-                    utils.text_format(screen, "Convert a rune into a permanent buff", 20, (20,0),(212,212,212), 40)
-                    utils.text_format(screen, "Or press ESC to exit", 20, (150, 435), (212,212,212), 40)
-                    pygame.display.flip()
-                    
-                    while(1):
-                        inventory.fill((224,224,224))
-                        inventory = inventory.convert()
-                        utils.text_format(inventory, "INVENTORY", 24, (170,0), (0, 0, 255), 28)
-                        utils.text_format(inventory, "Runes:", 16, (360, 34), (255,0,0),20)
-                        utils.text_format(inventory, "Buffs:", 16, (100, 34), (255,0,255),20)
-                        
-                        i = 0
-                        runes = []
-                        for rune in has_runes:
-                            if rune == True:
-                                runes.append(i)
-                            i += 1
-                        buffs = []
-                        for buff in has_buffs:
-                            if buff is not False:
-                                buffs.append(buff)
-                        
-                        event_list = [event for event in pygame.event.get()]
-                        for event in event_list:
-                            if event.type == QUIT:
-                                return
-                            elif event.type == KEYDOWN:
-                                if event.key == K_ESCAPE:
-                                    exit_inventory = True
-                                elif event.key == K_DOWN:
-                                    if (item_selected <(len(runes)-1)):
-                                        item_selected += 1
-                                elif event.key == K_UP:
-                                    if (item_selected>0):
-                                        item_selected -= 1
-                                elif event.key == K_RETURN:
-                                    buff_num = runes[item_selected]
-                                    has_buffs[len(buffs)] = buff_num
-                                    has_runes[buff_num] = False
-                                    character.buff_effects[buff_num] = True
-                                    exit_inventory = True
-                        if exit_inventory:
-                            break
-                        if(len(runes) != 0):
-                           inventory.blit(selector, (14,62+36*(item_selected+len(buffs))))
-                        for y in range(62,350,36):
-                            inventory.blit(panel, (272, y+2))
-                        for y in range(62,350,36):
-                            inventory.blit(panel, (16, y+2))
-                        
-                        i = 0
-                        for buff in buffs:
-                            inventory.blit(runes_pictures[buff], (16, 64+36*i))
-                            utils.text_format(inventory, buffs_text[buff], 8, (54, 66+36*i), (255,255,255), 22)
-                            i += 1
-                        i = 0
-                        for rune in runes:
-                            inventory.blit(runes_pictures[rune], (274,64+36*i))
-                            utils.text_format(inventory, runes_text[rune], 8, (312,66+36*i), (255, 255, 255), 22)
-                            inventory.blit(runes_pictures[rune], (16, 64+36*(i+len(buffs))))
-                            utils.text_format(inventory, add_buffs_text[rune], 8, (54, 72+36*(i+len(buffs))), (255,255,255), 22)
-                            i += 1
-                        screen.blit(inventory, (56,56))
-                        pygame.display.flip()
-                
                 elif event.key == K_e:
                     for room in l.getAllRooms():
                         if room.medbay.sprites() != [] and room.medbay.sprites()[0].can_heal == True:

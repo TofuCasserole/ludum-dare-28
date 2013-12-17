@@ -336,6 +336,8 @@ class Sword(pygame.sprite.Sprite):
             if monster.health <= 0:
                 if character.buff_effects[0]:
                     character.health += 5
+                    if character.health>100:
+                        character.health=100
                 monster.kill()
                 if monster.isBoss:
                     pygame.event.post(pygame.event.Event(USEREVENT, {'subtype': 'BossDeath'}))
@@ -376,30 +378,40 @@ class Door(pygame.sprite.Sprite):
         
     def update(self, character, l):
         if pygame.sprite.collide_mask(self, character):
+            roomChange=False
             if self.rect.left == 320 and self.rect.top == 0:
                 character.rune_effects = [False, False, False, False, False, False, False, False]
                 character.rect.y = 416
                 character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['north'])
                 character.currentroom.moveables.add(character)
+                roomChange=True
             elif self.rect.left == 320 and self.rect.top == 448:
                 character.rune_effects = [False, False, False, False, False, False, False, False]
                 character.rect.y = 32                
                 character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['south'])
                 character.currentroom.moveables.add(character)
+                roomChange=True 
             elif self.rect.top == 224 and self.rect.left == 32:
                 character.rune_effects = [False, False, False, False, False, False, False, False]
                 character.rect.x = 576
                 character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['west'])
                 character.currentroom.moveables.add(character)
+                roomChange=True
             elif self.rect.top == 224 and self.rect.left == 608:
                 character.rune_effects = [False, False, False, False, False, False, False, False]
                 character.rect.x = 64
                 character.currentroom.moveables.remove(character)
                 character.currentroom = l.getLocation(character.currentroom.connectingRooms['east'])
                 character.currentroom.moveables.add(character)
+                roomChange=True
+            if roomChange:
+                if character.currentroom==l.getLocation(l.bossRoom) and len(l.getLocation(l.bossRoom).monsters)>0:#we have entered the boss room, time to lock the player in
+                    doors=l.getLocation(l.bossRoom).door_sprites
+                    for door in doors:
+                        l.getLocation(l.bossRoom).bossdoors.add(BossDoor(door.rect.topleft))
         for monster in pygame.sprite.spritecollide(self, character.currentroom.monsters, 0):
             if self.rect.left == 320 and self.rect.top == 0:
                 monster.rect.top = self.rect.bottom
@@ -570,7 +582,7 @@ class Room:
         self.levelExit=pygame.sprite.RenderUpdates() 
     def add_monsters(self, charactersprites, level):
         if level.bossRoom==self.cord:
-            temp_monster = monsters.Monster(monsters.BOSS)
+            temp_monster = monsters.Monster(monsters.BOSS, level.levelNumber)
             temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-32), random.randint(0,temp_monster.area.bottom-32))
             while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
                or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
@@ -581,9 +593,9 @@ class Room:
         for i in range(random.randint(3,5)):
             x = random.randint(0,1)
             if x == 0:
-                temp_monster = monsters.Monster(monsters.MNM)
+                temp_monster = monsters.Monster(monsters.MNM, level.levelNumber)
             if x == 1:
-                temp_monster = monsters.Monster(monsters.MNM_RANGED)
+                temp_monster = monsters.Monster(monsters.MNM_RANGED,level.levelNumber)
             temp_monster.rect.topleft = (random.randint(32,temp_monster.area.right-64), random.randint(0,temp_monster.area.bottom-64))
             while (pygame.sprite.spritecollide(temp_monster, charactersprites, 0) != [] or pygame.sprite.spritecollide(temp_monster, self.walls, 0) != []
                or pygame.sprite.spritecollide(temp_monster, self.monsters, 0) != []):
