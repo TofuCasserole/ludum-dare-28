@@ -53,7 +53,7 @@ BOSS = {
                                  True, 8),
                        'walk_to_center':([Rect(0,0,32,32), Rect(32,0,32,32),
                                           Rect(0,0,32,32), Rect(64,0,32,32)],
-                                         True, 8),
+                                           True, 8),
                        'charge':([Rect(0,0,32,32), Rect(32,0,32,32),
                                   Rect(0,0,32,32), Rect(64,0,32,32)],
                                  True, 2)
@@ -62,7 +62,7 @@ BOSS = {
 
 class Monster(actor.Actor):
     
-    def __init__(self, mon_type):
+    def __init__(self, mon_type, level):
         if mon_type['random_state']:
             self.state = random.choice(mon_type['init_state'])
         else:
@@ -82,8 +82,8 @@ class Monster(actor.Actor):
         self.hitcount = 0
         self.pushcount = 0
         self.cannot_collide = pygame.sprite.Group()
-        self.health = mon_type['health']
-        self.strength = mon_type['strength']
+        self.health = mon_type['health']+(level-1)
+        self.strength = mon_type['strength']+(level-1)
         self.waitcount = 0
         self.movecount = 0
         self.isBoss=mon_type['is_boss']
