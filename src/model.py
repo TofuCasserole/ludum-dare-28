@@ -413,7 +413,7 @@ class Door(pygame.sprite.Sprite):
 class MedBay(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = load_png('bossdoor.png')
+        self.image = load_png('medbay.png')
         self.image = pygame.transform.scale(self.image, (32, 32))
         self.rect = self.image.get_rect()
         self.rect.topleft = (576,416)
