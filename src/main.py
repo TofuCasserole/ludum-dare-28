@@ -20,6 +20,7 @@ def main():
             background.blit(dirt, (x,y))
     levelNumber=1
     inventory = pygame.Surface((528,368))
+    song = model.Music()
     panel = pygame.surface.Surface((242, 32))
     panel.fill((192,192,192))
     selector = pygame.surface.Surface((246,36))
@@ -108,6 +109,7 @@ def main():
                     item_selected = 0
                     
                     while(1):
+                        clock.tick(40)
                         inventory.fill((224,224,224))
                         inventory = inventory.convert()
                         utils.text_format(inventory, "INVENTORY", 24, (170,0), (0, 0, 255), 28)
@@ -162,6 +164,7 @@ def main():
                             i += 1
                         screen.blit(inventory, (56,56))
                         pygame.display.flip()
+                        song.update(1/40)
                 if event.key == K_b:
                     alpha = pygame.Surface(screen.get_size())
                     alpha.fill((0,0,0))
@@ -336,6 +339,7 @@ def main():
         character.currentroom.medbay.update(character, l)
         sword.draw(screen)
         pygame.display.flip()
+        song.update(1/40)
     alpha = pygame.Surface(screen.get_size())
     for x in range(64):
         clock.tick(32)

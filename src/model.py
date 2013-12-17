@@ -43,6 +43,19 @@ def load_png(name):
             raise SystemExit, message
     return image
 
+class Music():
+    def __init__(self):
+        pygame.mixer.init()
+        self.song = pygame.mixer.Sound('../res/dungeon_crawl_theme.wav')
+        self.song.play()
+        self.time = 0
+    def update(self, increment):
+        self.time += increment
+        if self.time > self.song.get_length():
+            self.song.play()
+            self.time = 0
+        
+
 class Character(actor.Actor):
     def __init__(self):
         image = load_png('char.png')
